@@ -1,19 +1,27 @@
-
 const DIMPOO_LOGIN_PAGE = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#160d1d">
+<meta name="theme-color" content="#3b0d1c">
 <title>You Are My Mirror</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=Mulish:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --pink: #f49ab9;
-  --rose: #ffb7cb;
-  --cream: #fff3f6;
-  --muted: #d5c0d2;
-  --night: #160d1d;
+  --wine: #3b0d1c;        /* deep rose at dusk */
+  --wine-2: #5c1530;
+  --rose: #c2405e;        /* full-bloom rose */
+  --blush: #f7d9de;       /* petal */
+  --petal-paper: #fdf1f2; /* card */
+  --leaf: #5b7a52;        /* stem and leaves */
+  --gold: #e9c58f;        /* pollen / candle light */
+  --ink: #4a1626;         /* text on light */
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: "Mulish", "Segoe UI", Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -26,16 +34,17 @@ html, body {
 
 body {
   min-height: 100vh;
-  color: var(--cream);
-  font-family: Georgia, "Times New Roman", serif;
+  color: var(--blush);
+  font-family: var(--serif);
   background:
-    radial-gradient(ellipse at 12% 20%, #49213d, transparent 42%),
-    radial-gradient(ellipse at 90% 80%, #29204d, transparent 45%),
-    var(--night);
+    radial-gradient(ellipse at 15% 10%, rgba(194,64,94,.35), transparent 45%),
+    radial-gradient(ellipse at 85% 90%, rgba(91,122,82,.28), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--wine-2), var(--wine) 75%);
   overflow-x: hidden;
 }
 
-.ambient {
+/* Falling petals */
+.petals {
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -43,22 +52,29 @@ body {
   z-index: 0;
 }
 
-.star {
+.petal {
   position: absolute;
-  color: #ffd3e0;
-  opacity: .5;
-  animation: twinkle 3s ease-in-out infinite alternate;
+  top: -40px;
+  left: var(--x);
+  width: var(--s);
+  height: calc(var(--s) * 1.25);
+  border-radius: 150% 0 150% 0;
+  background: linear-gradient(135deg, #f4a7b6, #c2405e 80%);
+  opacity: .75;
+  animation:
+    fall var(--d) linear infinite,
+    sway 3.4s ease-in-out infinite alternate;
+  animation-delay: var(--delay), var(--delay);
 }
 
-.star:nth-child(1) { top: 12%; left: 8%; }
-.star:nth-child(2) { top: 22%; left: 48%; animation-delay: 1s; }
-.star:nth-child(3) { top: 70%; left: 12%; animation-delay: .6s; }
-.star:nth-child(4) { top: 16%; right: 8%; animation-delay: 1.4s; }
-.star:nth-child(5) { top: 83%; right: 17%; animation-delay: .3s; }
+@keyframes fall {
+  from { transform: translateY(-40px) rotate(0deg); }
+  to   { transform: translateY(110vh) rotate(540deg); }
+}
 
-@keyframes twinkle {
-  from { opacity: .2; transform: scale(.8); }
-  to { opacity: .9; transform: scale(1.3); }
+@keyframes sway {
+  from { margin-left: -18px; }
+  to   { margin-left: 18px; }
 }
 
 .page {
@@ -74,24 +90,24 @@ body {
   align-items: center;
 }
 
-/* Left side: only the song title and its lyrics */
+/* Left: the song panel */
 .story {
   position: relative;
   min-width: 0;
   min-height: 650px;
   overflow: hidden;
-  border: 1px solid rgba(255,183,203,.18);
-  border-radius: 24px;
+  border-radius: 200px 200px 28px 28px; /* arched like a garden gate */
+  border: 1px solid rgba(233,197,143,.35);
   background:
     linear-gradient(
       180deg,
-      rgba(17,8,22,.04) 10%,
-      rgba(17,8,22,.12) 45%,
-      rgba(17,8,22,.88) 100%
+      rgba(59,13,28,.05) 10%,
+      rgba(59,13,28,.25) 45%,
+      rgba(59,13,28,.92) 100%
     ),
     url("/mirror-red-thread.png") center center / cover no-repeat,
-    linear-gradient(145deg, #49213d, #171023);
-  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+    linear-gradient(160deg, #7a1f3d, var(--wine));
+  box-shadow: 0 30px 90px rgba(20,0,8,.5);
 
   opacity: 0;
   visibility: hidden;
@@ -105,67 +121,71 @@ body {
   transform: translateY(0);
 }
 
+.vine {
+  position: absolute;
+  width: 170px;
+  height: auto;
+  pointer-events: none;
+  opacity: .9;
+}
+
+.vine.left  { top: 70px; left: -6px; }
+.vine.right { top: 70px; right: -6px; transform: scaleX(-1); }
+
 .story-copy {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 30px 24px 35px;
+  padding: 30px 28px 38px;
   text-align: center;
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(17,8,22,.84) 25%,
-    rgba(17,8,22,.94)
+    rgba(59,13,28,.86) 28%,
+    rgba(59,13,28,.96)
   );
+}
+
+.bloom {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 6px;
+  display: block;
+  transform: scale(.4) rotate(-40deg);
+  opacity: 0;
+  transition: transform 2.2s cubic-bezier(.2,.8,.2,1) .4s, opacity 1.6s ease .4s;
+}
+
+.story.visible .bloom {
+  transform: scale(1) rotate(0deg);
+  opacity: 1;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(40px, 5vw, 67px);
-  line-height: 1.08;
-  font-weight: normal;
-  letter-spacing: -1px;
-  color: var(--rose);
-  text-shadow: 0 0 25px rgba(255,145,183,.25);
-}
-
-h1 span {
+  font-family: var(--serif);
+  font-size: clamp(44px, 5.4vw, 72px);
+  line-height: 1;
+  font-weight: 500;
   font-style: italic;
+  letter-spacing: -.5px;
+  color: var(--blush);
+  text-shadow: 0 2px 30px rgba(194,64,94,.45);
 }
 
-.thread-divider {
-  width: 145px;
-  height: 2px;
-  position: relative;
-  margin: 24px auto 18px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #ff416d,
-    #ff8bab,
-    transparent
-  );
-  box-shadow: 0 0 12px rgba(255,65,109,.55);
-}
-
-.thread-divider::after {
-  content: "♡";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: #211125;
-  color: #ff8bab;
-  padding: 0 10px;
-  font-size: 23px;
+.stem-divider {
+  display: block;
+  width: 180px;
+  height: 22px;
+  margin: 20px auto 16px;
 }
 
 .lyrics-area {
   min-height: 65px;
-  color: #ffe5ed;
-  font-size: clamp(16px, 2vw, 21px);
-  line-height: 1.7;
+  color: #fbe6ea;
+  font-size: clamp(18px, 2.1vw, 23px);
+  line-height: 1.65;
   font-style: italic;
 }
 
@@ -175,89 +195,104 @@ h1 span {
 
 @keyframes lyricFade {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Right side: existing login wording */
+/* Right: the sign-in card, like a pressed-flower note */
 .login-card {
+  position: relative;
   width: 100%;
   max-width: 410px;
   justify-self: center;
-  padding: 36px clamp(22px, 4vw, 34px);
-  border: 1px solid rgba(255,183,203,.38);
-  border-radius: 24px;
-  background: linear-gradient(
-    145deg,
-    rgba(65,35,57,.92),
-    rgba(26,17,35,.96)
-  );
+  padding: 40px clamp(22px, 4vw, 36px) 34px;
+  border-radius: 6px 6px 6px 40px;
+  background: var(--petal-paper);
+  color: var(--ink);
   box-shadow:
-    0 24px 80px rgba(0,0,0,.35),
-    inset 0 1px rgba(255,255,255,.06);
-  backdrop-filter: blur(18px);
+    0 30px 80px rgba(20,0,8,.45),
+    0 0 0 8px rgba(247,217,222,.08);
 }
 
-.card-heart {
-  text-align: center;
-  color: var(--rose);
-  font-size: 32px;
-  margin-bottom: 18px;
+.card-rose {
+  position: absolute;
+  top: -34px;
+  right: -22px;
+  width: 92px;
+  height: 92px;
+  transform: rotate(18deg);
+  filter: drop-shadow(0 8px 14px rgba(59,13,28,.35));
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--wine-2);
 }
 
 .card-intro {
-  margin: 0 0 26px;
-  color: var(--muted);
-  font: 13px/1.8 Arial, sans-serif;
-  text-align: center;
+  margin: 8px 0 22px;
+  color: #8a5563;
+  font: 14px/1.7 var(--sans);
 }
 
 label {
   display: block;
-  color: #f1dce8;
-  font: 12px Arial, sans-serif;
-  margin: 18px 0 9px;
+  color: var(--ink);
+  font: 600 13px var(--sans);
+  margin: 16px 0 8px;
 }
 
 input {
   display: block;
   width: 100%;
-  min-height: 49px;
+  min-height: 50px;
   padding: 13px 15px;
-  border-radius: 11px;
-  border: 1px solid rgba(255,183,203,.3);
+  border-radius: 12px;
+  border: 1px solid #e8bfc8;
   outline: none;
-  color: white;
-  background: rgba(255,255,255,.045);
-  font: 14px Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  font: 15px var(--sans);
+  transition: border-color .2s, box-shadow .2s;
 }
 
-input::placeholder { color: #b8a4b5; }
+input::placeholder { color: #c49aa5; }
 
 input:focus {
   border-color: var(--rose);
-  box-shadow: 0 0 0 3px rgba(244,154,185,.12);
+  box-shadow: 0 0 0 4px rgba(194,64,94,.15);
 }
 
-button {
+.submit {
   width: 100%;
-  min-height: 50px;
+  min-height: 52px;
   border: none;
-  border-radius: 11px;
-  margin-top: 25px;
-  background: linear-gradient(110deg, #ffb5ca, #f18aab);
-  color: #341726;
-  font: bold 14px Arial, sans-serif;
+  border-radius: 999px;
+  margin-top: 26px;
+  background: linear-gradient(180deg, #cf4c6a, #a3304c);
+  color: #fff6f7;
+  font: 700 15px var(--sans);
+  letter-spacing: .2px;
   cursor: pointer;
-  box-shadow: 0 7px 25px rgba(241,138,171,.15);
+  box-shadow: 0 10px 24px rgba(163,48,76,.3);
   transition: transform .2s, filter .2s;
 }
 
-button:hover {
+.submit:hover {
   transform: translateY(-2px);
-  filter: brightness(1.07);
+  filter: brightness(1.06);
 }
 
-button:disabled {
+.submit:focus-visible,
+.audio-hint:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.submit:disabled {
   opacity: .7;
   cursor: wait;
 }
@@ -265,18 +300,21 @@ button:disabled {
 .message {
   min-height: 20px;
   margin-top: 14px;
-  color: #ffb1c7;
-  font: 12px/1.5 Arial, sans-serif;
+  color: #a3304c;
+  font: 600 13px/1.5 var(--sans);
   text-align: center;
   overflow-wrap: anywhere;
 }
 
 .card-footer {
-  margin-top: 26px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px dashed #e8bfc8;
   text-align: center;
   color: var(--rose);
-  font-size: clamp(19px, 2.3vw, 25px);
-  line-height: 1.5;
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 27px);
+  line-height: 1.35;
   font-style: italic;
 }
 
@@ -286,15 +324,15 @@ button:disabled {
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: auto;
   max-width: calc(100% - 28px);
-  min-height: auto;
-  padding: 12px 18px;
-  border: 1px solid rgba(255,183,203,.35);
-  border-radius: 30px;
-  background: #29182e;
-  color: white;
-  font: 12px Arial, sans-serif;
+  padding: 12px 20px;
+  border: 1px solid rgba(233,197,143,.5);
+  border-radius: 999px;
+  background: var(--petal-paper);
+  color: var(--ink);
+  font: 600 13px var(--sans);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(20,0,8,.4);
 }
 
 .audio-hint[hidden] { display: none; }
@@ -302,30 +340,29 @@ button:disabled {
 @media (max-width: 820px) {
   .page {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 18px 15px 75px;
+    gap: 44px;
+    padding: 18px 15px 80px;
   }
 
   .story {
-    order: 1;
-    min-height: 510px;
+    min-height: 520px;
+    border-radius: 160px 160px 24px 24px;
   }
 
-  .login-card {
-    order: 2;
-    max-width: 460px;
-  }
+  .login-card { max-width: 460px; }
 
-  h1 { font-size: clamp(39px, 9vw, 58px); }
+  .vine { width: 120px; }
 }
 
 @media (max-width: 420px) {
-  .story { min-height: 440px; }
-  .story-copy { padding: 24px 15px 28px; }
-  .login-card { padding: 29px 22px; }
+  .story { min-height: 450px; }
+  .story-copy { padding: 24px 16px 28px; }
+  .login-card { padding: 34px 20px 28px; }
+  .card-rose { width: 72px; height: 72px; right: -8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .petal { display: none; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
@@ -335,12 +372,58 @@ button:disabled {
 </head>
 
 <body>
-<div class="ambient" aria-hidden="true">
-  <span class="star">✦</span>
-  <span class="star">✧</span>
-  <span class="star">✦</span>
-  <span class="star">✧</span>
-  <span class="star">✦</span>
+
+<!-- Reusable rose drawing -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="petalOuter" cx="50%" cy="60%" r="60%">
+      <stop offset="0%" stop-color="#e2667f"/>
+      <stop offset="100%" stop-color="#8e1f3c"/>
+    </radialGradient>
+    <radialGradient id="petalInner" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#f6a3b3"/>
+      <stop offset="100%" stop-color="#c2405e"/>
+    </radialGradient>
+    <linearGradient id="leafFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7d9b6e"/>
+      <stop offset="100%" stop-color="#3f5a39"/>
+    </linearGradient>
+
+    <symbol id="rose" viewBox="0 0 200 200">
+      <path d="M100 150 C60 175 30 160 22 132 C55 128 80 135 100 150 Z" fill="url(#leafFill)"/>
+      <path d="M100 150 C140 175 172 160 178 130 C145 126 120 135 100 150 Z" fill="url(#leafFill)"/>
+      <g transform="translate(100 95)">
+        <g fill="url(#petalOuter)">
+          <ellipse rx="40" ry="28" transform="rotate(0) translate(0 -30)"/>
+          <ellipse rx="40" ry="28" transform="rotate(72) translate(0 -30)"/>
+          <ellipse rx="40" ry="28" transform="rotate(144) translate(0 -30)"/>
+          <ellipse rx="40" ry="28" transform="rotate(216) translate(0 -30)"/>
+          <ellipse rx="40" ry="28" transform="rotate(288) translate(0 -30)"/>
+        </g>
+        <g fill="url(#petalInner)">
+          <ellipse rx="28" ry="20" transform="rotate(36) translate(0 -17)"/>
+          <ellipse rx="28" ry="20" transform="rotate(108) translate(0 -17)"/>
+          <ellipse rx="28" ry="20" transform="rotate(180) translate(0 -17)"/>
+          <ellipse rx="28" ry="20" transform="rotate(252) translate(0 -17)"/>
+          <ellipse rx="28" ry="20" transform="rotate(324) translate(0 -17)"/>
+        </g>
+        <circle r="20" fill="#d4506d"/>
+        <path d="M-12 2 C-12 -14 12 -16 13 -2 C14 10 -2 13 -4 3 C-5 -4 5 -5 5 1"
+              fill="none" stroke="#7d1734" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="petals" aria-hidden="true">
+  <span class="petal" style="--x:6%;  --s:14px; --d:13s; --delay:0s"></span>
+  <span class="petal" style="--x:18%; --s:10px; --d:16s; --delay:4s"></span>
+  <span class="petal" style="--x:31%; --s:16px; --d:12s; --delay:8s"></span>
+  <span class="petal" style="--x:44%; --s:11px; --d:18s; --delay:2s"></span>
+  <span class="petal" style="--x:58%; --s:15px; --d:14s; --delay:6s"></span>
+  <span class="petal" style="--x:71%; --s:12px; --d:17s; --delay:10s"></span>
+  <span class="petal" style="--x:83%; --s:17px; --d:13s; --delay:3s"></span>
+  <span class="petal" style="--x:94%; --s:10px; --d:15s; --delay:7s"></span>
 </div>
 
 <audio id="song" src="/vimlesh.mp3" preload="auto" loop playsinline></audio>
@@ -348,19 +431,42 @@ button:disabled {
 <main class="page">
 
   <section class="story" id="story">
+    <svg class="vine left" viewBox="0 0 170 320" aria-hidden="true">
+      <path d="M8 0 C40 60 10 120 40 180 C60 220 30 270 50 320"
+            fill="none" stroke="#5b7a52" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 70 C60 55 75 70 80 80 C60 90 40 85 30 70 Z" fill="#6b8a5e"/>
+      <path d="M28 150 C0 140 -5 160 0 168 C15 170 25 162 28 150 Z" fill="#6b8a5e"/>
+      <path d="M44 230 C75 220 88 235 90 245 C70 252 52 246 44 230 Z" fill="#6b8a5e"/>
+      <use href="#rose" x="40" y="88" width="64" height="64"/>
+      <use href="#rose" x="10" y="190" width="44" height="44"/>
+    </svg>
+    <svg class="vine right" viewBox="0 0 170 320" aria-hidden="true">
+      <path d="M8 0 C40 60 10 120 40 180 C60 220 30 270 50 320"
+            fill="none" stroke="#5b7a52" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 70 C60 55 75 70 80 80 C60 90 40 85 30 70 Z" fill="#6b8a5e"/>
+      <path d="M44 230 C75 220 88 235 90 245 C70 252 52 246 44 230 Z" fill="#6b8a5e"/>
+      <use href="#rose" x="30" y="120" width="54" height="54"/>
+    </svg>
+
     <div class="story-copy">
-      <h1>You Are<br><span>My Mirror</span></h1>
-      <div class="thread-divider"></div>
+      <svg class="bloom" aria-hidden="true"><use href="#rose"/></svg>
+      <h1>You Are<br>My Mirror</h1>
+      <svg class="stem-divider" viewBox="0 0 180 22" aria-hidden="true">
+        <path d="M4 11 H176" stroke="#e9c58f" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+        <path d="M62 11 C70 2 80 2 84 9 C76 12 68 13 62 11 Z" fill="#7d9b6e"/>
+        <path d="M118 11 C110 20 100 20 96 13 C104 10 112 9 118 11 Z" fill="#7d9b6e"/>
+        <use href="#rose" x="79" y="0" width="22" height="22"/>
+      </svg>
       <div class="lyrics-area" id="lyrics" aria-live="polite"></div>
     </div>
   </section>
 
   <section class="login-card">
-    <div class="card-heart">♡</div>
+    <svg class="card-rose" aria-hidden="true"><use href="#rose"/></svg>
 
+    <h2 class="card-title">Welcome back</h2>
     <p class="card-intro">
-      A little space made with love.<br>
-      Sign in to continue.
+      A little garden made with love. Sign in to continue.
     </p>
 
     <form id="loginForm">
@@ -384,7 +490,7 @@ button:disabled {
         required
       >
 
-      <button id="loginButton" type="submit">Enter with love ♡</button>
+      <button class="submit" id="loginButton" type="submit">Enter with love ♡</button>
       <div class="message" id="message" role="status"></div>
     </form>
 
