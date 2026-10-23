@@ -43,7 +43,11 @@ body {
   overflow-x: hidden;
 }
 
-/* Falling petals */
+/* Falling 3D rose petals
+   Three nested layers so each motion is independent:
+   .petal        falls and drifts sideways
+   .petal-sway   swings like a leaf on air
+   .petal-tumble flips in 3D (perspective comes from .petal-sway) */
 .petals {
   position: fixed;
   inset: 0;
@@ -54,27 +58,53 @@ body {
 
 .petal {
   position: absolute;
-  top: -40px;
+  top: 0;
   left: var(--x);
   width: var(--s);
-  height: calc(var(--s) * 1.25);
-  border-radius: 150% 0 150% 0;
-  background: linear-gradient(135deg, #f4a7b6, #c2405e 80%);
-  opacity: .75;
-  animation:
-    fall var(--d) linear infinite,
-    sway 3.4s ease-in-out infinite alternate;
-  animation-delay: var(--delay), var(--delay);
+  height: calc(var(--s) * 1.2);
+  opacity: var(--o);
+  animation: petalFall var(--d) linear var(--delay) infinite;
+  will-change: transform;
 }
 
-@keyframes fall {
-  from { transform: translateY(-40px) rotate(0deg); }
-  to   { transform: translateY(110vh) rotate(540deg); }
+@keyframes petalFall {
+  from { transform: translate3d(0, -15vh, 0); }
+  to   { transform: translate3d(var(--drift), 115vh, 0); }
 }
 
-@keyframes sway {
-  from { margin-left: -18px; }
-  to   { margin-left: 18px; }
+.petal-sway {
+  width: 100%;
+  height: 100%;
+  perspective: 420px;
+  animation: petalSway var(--sw) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes petalSway {
+  from { transform: translateX(calc(var(--amp) * -1)) rotate(-8deg); }
+  to   { transform: translateX(var(--amp)) rotate(8deg); }
+}
+
+.petal-tumble {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 35%;
+  animation: petalTumble var(--t) ease-in-out var(--delay) infinite;
+}
+
+@keyframes petalTumble {
+  0%   { transform: rotateZ(var(--r0)) rotateX(15deg)  rotateY(-10deg); }
+  25%  { transform: rotateZ(calc(var(--r0) + 90deg))  rotateX(75deg)  rotateY(35deg); }
+  50%  { transform: rotateZ(calc(var(--r0) + 180deg)) rotateX(165deg) rotateY(-25deg); }
+  75%  { transform: rotateZ(calc(var(--r0) + 270deg)) rotateX(255deg) rotateY(40deg); }
+  100% { transform: rotateZ(calc(var(--r0) + 360deg)) rotateX(375deg) rotateY(-10deg); }
+}
+
+.petal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 6px 7px rgba(30,0,10,.38));
 }
 
 .page {
@@ -362,7 +392,7 @@ input:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .petal { display: none; }
+  .petals { display: none; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
@@ -388,6 +418,44 @@ input:focus {
       <stop offset="0%" stop-color="#7d9b6e"/>
       <stop offset="100%" stop-color="#3f5a39"/>
     </linearGradient>
+
+    <!-- Real petal shading: dark crimson base, lighter rim, cupped curl, soft sheen -->
+    <linearGradient id="petalBody" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%"   stop-color="#f3d6c4"/>
+      <stop offset="9%"   stop-color="#e58a96"/>
+      <stop offset="22%"  stop-color="#b8203f"/>
+      <stop offset="60%"  stop-color="#c92a4d"/>
+      <stop offset="100%" stop-color="#a3183b"/>
+    </linearGradient>
+    <linearGradient id="petalCurl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="40%"  stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="65%"  stop-color="#3b0d1c" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3b0d1c" stop-opacity=".45"/>
+    </linearGradient>
+    <radialGradient id="petalSheen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="petalRim" cx="50%" cy="85%" r="85%">
+      <stop offset="70%"  stop-color="#6e1230" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#6e1230" stop-opacity=".55"/>
+    </radialGradient>
+
+    <path id="petalShape"
+          d="M50 118 C42 113 33 102 25 86 C13 64 5 44 10 28 C15 13 29 6 43 8 C46 8.5 48.5 10.5 50 12 C51.5 10.5 54 8.5 57 8 C71 6 85 13 90 28 C95 44 87 64 75 86 C67 102 58 113 50 118 Z"/>
+
+    <symbol id="petal" viewBox="0 0 100 120">
+      <use href="#petalShape" fill="url(#petalBody)" stroke="#7a1030" stroke-width=".6"/>
+      <use href="#petalShape" fill="url(#petalCurl)" stroke="none"/>
+      <use href="#petalShape" fill="url(#petalRim)" stroke="none"/>
+      <ellipse cx="38" cy="46" rx="15" ry="28" fill="url(#petalSheen)" transform="rotate(-14 36 42)"/>
+      <g fill="none" stroke="#5e0f28" stroke-opacity=".09" stroke-width=".9" stroke-linecap="round">
+        <path d="M50 114 C49 84 48 52 50 20"/>
+        <path d="M50 114 C45 86 36 58 24 30"/>
+        <path d="M50 114 C55 86 64 58 76 30"/>
+      </g>
+    </symbol>
 
     <symbol id="rose" viewBox="0 0 200 200">
       <path d="M100 150 C60 175 30 160 22 132 C55 128 80 135 100 150 Z" fill="url(#leafFill)"/>
@@ -415,16 +483,49 @@ input:focus {
   </defs>
 </svg>
 
-<div class="petals" aria-hidden="true">
-  <span class="petal" style="--x:6%;  --s:14px; --d:13s; --delay:0s"></span>
-  <span class="petal" style="--x:18%; --s:10px; --d:16s; --delay:4s"></span>
-  <span class="petal" style="--x:31%; --s:16px; --d:12s; --delay:8s"></span>
-  <span class="petal" style="--x:44%; --s:11px; --d:18s; --delay:2s"></span>
-  <span class="petal" style="--x:58%; --s:15px; --d:14s; --delay:6s"></span>
-  <span class="petal" style="--x:71%; --s:12px; --d:17s; --delay:10s"></span>
-  <span class="petal" style="--x:83%; --s:17px; --d:13s; --delay:3s"></span>
-  <span class="petal" style="--x:94%; --s:10px; --d:15s; --delay:7s"></span>
-</div>
+<div class="petals" id="petals" aria-hidden="true"></div>
+
+<script>
+(function () {
+  "use strict";
+  var box = document.getElementById("petals");
+  if (!box) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var count = window.innerWidth < 600 ? 14 : 26;
+  var html = "";
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  for (var i = 0; i < count; i++) {
+    // depth 0 = far away (small, slow, soft), 1 = close (big, faster, sharp)
+    var depth = Math.random();
+    var size = 14 + depth * 34;
+    var fall = 26 - depth * 12 + rand(-2, 3);
+    var blur = depth < 0.3 ? "filter:blur(" + (1.6 - depth * 4).toFixed(2) + "px);" : "";
+
+    html +=
+      '<div class="petal" style="' +
+        "--x:" + rand(-5, 100).toFixed(1) + "%;" +
+        "--s:" + size.toFixed(1) + "px;" +
+        "--o:" + (0.55 + depth * 0.4).toFixed(2) + ";" +
+        "--d:" + fall.toFixed(1) + "s;" +
+        "--delay:-" + rand(0, fall).toFixed(1) + "s;" +
+        "--drift:" + rand(-20, 25).toFixed(1) + "vw;" +
+        "--sw:" + rand(2.6, 4.8).toFixed(1) + "s;" +
+        "--amp:" + rand(18, 55).toFixed(0) + "px;" +
+        "--t:" + rand(5, 10).toFixed(1) + "s;" +
+        "--r0:" + rand(0, 360).toFixed(0) + "deg;" +
+        "z-index:" + Math.round(depth * 10) + ";" +
+        blur +
+      '"><div class="petal-sway"><div class="petal-tumble">' +
+        '<svg viewBox="0 0 100 120"><use href="#petal"/></svg>' +
+      "</div></div></div>";
+  }
+
+  box.innerHTML = html;
+})();
+</script>
 
 <audio id="song" src="/vimlesh.mp3" preload="auto" loop playsinline></audio>
 
