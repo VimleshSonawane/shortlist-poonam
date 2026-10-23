@@ -1,430 +1,430 @@
-<!doctype html>
+
+export const DIMPOO_LOGIN_PAGE = `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex">
-<meta name="color-scheme" content="light">
-<title>Shortlist — jobs</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For Dimpoo ♡</title>
+
 <style>
-:root{
-  --paper:#FFFFFF; --ink:#1F2A44; --ink-soft:#5D6680; --rule:#E4E7EF; --tint:#F6F7FB;
-  --pen:#C2413A; --ok:#2E8B57; --warn:#B7791F; --accent:#3D5AB8;
-  --lav:#F3F1FF; --mint:#ECF8F2; --peach:#FFF3EA; --sky:#EDF4FF; --rose:#FFF0F4;
-  --serif:"Newsreader",Georgia,"Times New Roman",serif;
-  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 25%, rgba(112,30,65,.24), transparent 45%),
+    linear-gradient(135deg, #090909, #171014 55%, #090909);
+  color: #f7edf0;
+  font-family: Georgia, "Times New Roman", serif;
 }
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
-body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--sans)}
-a{color:var(--accent)}
-:focus-visible{outline:3px solid rgba(61,90,184,.45);outline-offset:2px;border-radius:6px}
 
-.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--rule)}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:rgba(255,255,255,.9)}
-.navin{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.brand{font:600 22px var(--serif)}
-.navlinks{display:flex;gap:4px}
-.navlinks a{text-decoration:none;color:var(--ink-soft);font-weight:500;padding:6px 12px;border-radius:999px}
-.navlinks a[aria-current="page"]{background:var(--sky);color:var(--accent)}
-.who{margin-left:auto;color:var(--ink-soft);font-size:14px}
-
-.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
-h1{font:600 clamp(28px,4vw,38px)/1.15 var(--serif);margin:0 0 6px}
-.lede{color:var(--ink-soft);margin:0 0 22px;max-width:62ch}
-
-.controls{display:grid;grid-template-columns:2fr 1fr 2fr 1.3fr 1fr;gap:12px;align-items:end;padding:16px;border:1px solid var(--rule);border-radius:16px;background:var(--tint)}
-.controls label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
-select,input[type=text],input[type=number],textarea{width:100%;font:15px var(--sans);color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:10px;padding:9px 11px}
-textarea{min-height:120px;resize:vertical}
-.check{display:flex;align-items:center;gap:8px;font-size:14px;padding-bottom:9px}
-.paste{margin-top:12px;display:none}
-.paste.on{display:block}
-.paste p{margin:0 0 8px;font-size:14px;color:var(--ink-soft)}
-
-.search{padding:16px;border:1px solid var(--rule);border-radius:16px;margin-bottom:14px}
-.search label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
-.srow{display:grid;grid-template-columns:1fr 240px;gap:16px}
-.tchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:6px}
-.tchips span{display:inline-flex;align-items:center;gap:4px;background:var(--sky);color:var(--accent);font-size:14px;font-weight:500;padding:4px 6px 4px 12px;border-radius:999px}
-.tchips button{border:0;background:transparent;color:var(--accent);padding:0 6px;font-size:16px;line-height:1}
-.addrow{display:flex;gap:8px}
-.boards{margin-top:12px}
-.boards .hint{margin:8px 0}
-.sbar{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
-.hint{color:var(--ink-soft);font-size:13.5px;margin:8px 0 0}
-.kw .pf{background:var(--lav)}
-.meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 2px 8px;color:var(--ink-soft);font-size:14px;flex-wrap:wrap}
-
-.list{list-style:none;margin:0;padding:0}
-.job{display:grid;grid-template-columns:76px 1fr;gap:18px;padding:20px 4px;border-bottom:1px solid var(--rule)}
-.score{text-align:center}
-.score b{display:block;font:600 40px/1 var(--serif);letter-spacing:-.02em}
-.score small{display:block;font-size:12px;color:var(--ink-soft);margin-top:4px}
-.s-hi b{color:var(--ok)} .s-mid b{color:var(--accent)} .s-low b{color:var(--warn)} .s-bad b{color:var(--pen)}
-.jt{margin:0;font:600 19px/1.3 var(--sans)}
-.jc{margin:2px 0 10px;color:var(--ink-soft);font-size:15px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
-.chips li{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--tint);border:1px solid var(--rule)}
-.chips .pay{background:var(--mint);border-color:#cfe9db}
-.chips .sp-no{background:var(--rose);border-color:#f3cfd8;color:#9b2c3f}
-.chips .sp-yes{background:var(--mint);border-color:#cfe9db;color:#1f6b43}
-.chips .sp-clearance{background:var(--peach);border-color:#f2dcc6;color:#8a5a14}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-button,.btn{font:600 14px var(--sans);border-radius:10px;padding:8px 14px;cursor:pointer;border:1px solid var(--rule);background:#fff;color:var(--ink);text-decoration:none;display:inline-block}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button:hover,.btn:hover{border-color:#b9c3dd}
-button.primary:hover{background:#34509f}
-details{margin-top:12px}
-summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--accent);width:max-content}
-.detail{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:14px}
-.detail h3{font:600 14px var(--sans);margin:0 0 6px}
-.detail p{margin:0 0 8px}
-.kw{display:flex;flex-wrap:wrap;gap:5px}
-.kw span{font-size:12.5px;padding:2px 8px;border-radius:6px}
-.kw .hit{background:var(--mint)} .kw .miss{background:var(--rose)}
-.desc{grid-column:1/-1;max-height:280px;overflow:auto;white-space:pre-wrap;background:var(--tint);border:1px solid var(--rule);border-radius:10px;padding:12px;font-size:13.5px;line-height:1.55}
-.empty{padding:40px 20px;text-align:center;color:var(--ink-soft);border:1px dashed var(--rule);border-radius:16px;margin-top:12px}
-.empty b{color:var(--ink)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
-.toast.on{opacity:1}
-
-@media (max-width:860px){
-  .controls{grid-template-columns:1fr 1fr}
-  .controls .wide{grid-column:1/-1}
-  .detail{grid-template-columns:1fr}
-  .srow{grid-template-columns:1fr}
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 360px;
+  gap: 36px;
+  padding: 36px;
+  align-items: center;
 }
-@media (max-width:520px){
-  .job{grid-template-columns:54px 1fr;gap:12px}
-  .score b{font-size:30px}
+
+.lyrics-stage {
+  min-width: 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.lyrics-inner {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+}
+
+.lyrics-heading {
+  color: #c9a1ac;
+  font-size: 12px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.lyrics-scroll {
+  visibility: hidden;
+  opacity: 0;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  transition: opacity .8s ease;
+}
+
+.lyrics-scroll.started {
+  visibility: visible;
+  opacity: 1;
+}
+
+.lyric-line {
+  margin: 0;
+  color: rgba(255,240,245,.35);
+  font-size: clamp(20px,3vw,36px);
+  line-height: 1.4;
+  transition: color .4s ease, transform .4s ease;
+}
+
+.lyric-line.active {
+  color: #fff5f7;
+  transform: scale(1.035);
+  text-shadow: 0 0 24px rgba(255,150,185,.3);
+}
+
+.lyric-line.past {
+  color: rgba(255,220,232,.55);
+}
+
+.login-area {
+  width: 100%;
+  max-width: 360px;
+  justify-self: end;
+}
+
+.login-card {
+  border: 1px solid rgba(255,208,222,.2);
+  border-radius: 24px;
+  padding: 30px;
+  background: rgba(20,15,18,.88);
+  box-shadow: 0 20px 70px rgba(0,0,0,.45);
+  backdrop-filter: blur(14px);
+}
+
+.heart {
+  font-size: 30px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+h1 {
+  text-align: center;
+  font-weight: normal;
+  font-size: 30px;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #c9a1ac;
+  font-size: 14px;
+  margin: 0 0 26px;
+}
+
+label {
+  display: block;
+  color: #e8cbd4;
+  font-size: 13px;
+  margin: 16px 0 8px;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #57414a;
+  border-radius: 10px;
+  background: #100d0f;
+  color: white;
+  font: inherit;
+  outline: none;
+}
+
+input:focus {
+  border-color: #d68da5;
+  box-shadow: 0 0 0 3px rgba(214,141,165,.12);
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 16px;
+  margin-top: 22px;
+  background: #d9a0b2;
+  color: #1b1014;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover { background: #edb7c8; }
+button:disabled { opacity: .65; cursor: wait; }
+
+.error {
+  display: none;
+  color: #ff9caa;
+  text-align: center;
+  font: 13px/1.5 Arial,sans-serif;
+  margin-top: 14px;
+}
+
+.love-note {
+  text-align: center;
+  margin-top: 24px;
+  color: #d7b5c0;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.signature {
+  display: block;
+  color: #f0c8d5;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.music-status {
+  color: #a88a95;
+  text-align: center;
+  font: 11px/1.5 Arial,sans-serif;
+  margin-top: 16px;
+}
+
+@media (max-width: 850px) {
+  .page {
+    grid-template-columns: 1fr;
+    padding: 24px 18px 40px;
+    gap: 20px;
+  }
+
+  .lyrics-stage {
+    min-height: 36vh;
+    order: 1;
+  }
+
+  .login-area {
+    order: 2;
+    justify-self: center;
+    max-width: 420px;
+  }
+
+  .lyric-line {
+    font-size: clamp(19px,5vw,29px);
+  }
+}
+
+@media (max-width: 420px) {
+  .login-card { padding: 24px 20px; }
+  .lyrics-heading { letter-spacing: 3px; }
+}
 </style>
 </head>
+
 <body>
-<nav class="topnav" aria-label="Sections">
-  <div class="navin">
-    <span class="brand">Shortlist</span>
-    <div class="navlinks">
-      <a href="/">Resume tools</a>
-      <a href="/jobs.html" aria-current="page">Jobs</a>
-    </div>
-    <span class="who" id="who"></span>
-  </div>
-</nav>
+<audio id="song" src="/vimlesh.mp3" preload="auto" autoplay loop playsinline></audio>
 
-<main class="wrap">
-  <h1>Jobs that fit your resume</h1>
-  <p class="lede">Jobs are searched from the titles in your saved resumes and refreshed once a day when you open this page. Each one is scored against the resume you pick and your portfolio. Choose “Tailor in Shortlist” to run the full screen and get suggestions.</p>
-
-  <section class="search" aria-label="What to search for">
-    <div class="srow">
-      <div class="grow">
-        <label for="tIn">Job titles to search</label>
-        <div class="tchips" id="tChips"></div>
-        <p class="hint" id="tAuto"></p>
-        <div class="addrow"><input id="tIn" type="text" placeholder="Add a title, e.g. project engineer"><button id="tAdd" type="button">Add</button></div>
-      </div>
-      <div class="where">
-        <label for="where">Location</label>
-        <input id="where" type="text" placeholder="City">
-        <label for="country" style="margin-top:10px">Country</label>
-        <select id="country">
-          <option value="us">United States</option><option value="in">India</option><option value="gb">United Kingdom</option>
-          <option value="ca">Canada</option><option value="au">Australia</option><option value="sg">Singapore</option>
-          <option value="de">Germany</option><option value="nl">Netherlands</option><option value="nz">New Zealand</option><option value="za">South Africa</option>
-        </select>
+<main class="page">
+  <section class="lyrics-stage">
+    <div class="lyrics-inner">
+      <div class="lyrics-heading">A little song, a little us</div>
+      <div id="lyricsScroll" class="lyrics-scroll">
+        <p class="lyric-line">♡</p>
       </div>
     </div>
-    <details class="boards"><summary>Companies to watch (optional)</summary>
-      <p class="hint">One per line, as <b>greenhouse:name</b>, <b>lever:name</b> or <b>ashby:name</b>. The name is the part after the domain in the company’s careers link, e.g. boards.greenhouse.io/<b>acme</b>. These give full job descriptions.</p>
-      <textarea id="boards" rows="3" aria-label="Companies to watch"></textarea>
-    </details>
-    <div class="sbar"><button class="primary" id="refresh" type="button">Refresh jobs</button><span id="sStatus" class="hint" role="status"></span></div>
-    <p class="hint" id="pfLine"></p>
   </section>
 
-  <section class="controls" aria-label="Filters">
-    <div class="wide">
-      <label for="resume">Score against</label>
-      <select id="resume"></select>
+  <section class="login-area">
+    <div class="login-card">
+      <div class="heart">♡</div>
+      <h1>Hi, Dimpoo</h1>
+      <p class="subtitle">A little place made just for you</p>
+
+      <form id="loginForm">
+        <label for="username">Your username</label>
+        <input id="username" name="username" type="text"
+          placeholder="Enter your username"
+          autocomplete="username" required>
+
+        <label for="password">Your password</label>
+        <input id="password" name="password" type="password"
+          placeholder="Enter your password"
+          autocomplete="current-password" required>
+
+        <button id="loginButton" type="submit">Open our little world ♡</button>
+        <p id="error" class="error" role="alert"></p>
+      </form>
     </div>
-    <div>
-      <label for="yrs">Your years of experience</label>
-      <input id="yrs" type="number" min="0" max="40" step="1" value="3">
+
+    <div class="love-note">
+      Some things are hard to put into words,
+      so I made you a little place instead.
+      <span class="signature">Made with love, just for you ♡</span>
     </div>
-    <div class="wide">
-      <label for="q">Search</label>
-      <input id="q" type="text" placeholder="Title, company or skill">
-    </div>
-    <div>
-      <label for="sort">Sort by</label>
-      <select id="sort">
-        <option value="score">Best match</option>
-        <option value="date">Newest</option>
-        <option value="pay">Highest pay</option>
-      </select>
-    </div>
-    <div>
-      <label class="check"><input id="hideNo" type="checkbox"> Hide “no sponsorship”</label>
+
+    <div id="musicStatus" class="music-status">
+      Our song is getting ready ♡
     </div>
   </section>
-  <div class="paste" id="pasteBox">
-    <p>No saved resumes found on this browser. Paste your resume text here to score jobs, or save a base resume in Resume tools → Saved.</p>
-    <textarea id="pasted" aria-label="Resume text"></textarea>
-  </div>
-
-  <div class="meta"><span id="count"></span><span id="updated"></span></div>
-  <ul class="list" id="list"></ul>
 </main>
-<div class="toast" id="toast" role="status"></div>
 
 <script>
-(async function(){
-  const $=id=>document.getElementById(id);
-  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const safeUrl=u=>/^https?:\/\//i.test(String(u||""))?u:"";
-  function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("on"),3200); }
-  const DAY=864e5;
+(function () {
+  const song = document.getElementById("song");
+  const lyricsScroll = document.getElementById("lyricsScroll");
+  const musicStatus = document.getElementById("musicStatus");
+  const form = document.getElementById("loginForm");
+  const loginButton = document.getElementById("loginButton");
+  const error = document.getElementById("error");
 
-  /* ---------- signed-in profile; every key below is private to it ---------- */
-  let user="local";
-  try{ const r=await fetch("/__whoami",{credentials:"same-origin"}); if(r.ok){ const j=await r.json(); user=j.user||"local"; } }catch(e){}
-  const SK=k=>"u:"+user+":"+k;
-  if(user!=="local") $("who").innerHTML=`Signed in as <b>${esc(user)}</b>`;
-  const store={
-    get(k,d){ try{ const v=localStorage.getItem(SK(k)); return v===null?d:JSON.parse(v); }catch(e){ return d; } },
-    set(k,v){ try{ localStorage.setItem(SK(k),JSON.stringify(v)); return true; }catch(e){ return false; } }
-  };
+  // Lyrics appear at 14 minutes and 30 seconds.
+  const LYRICS_START_AT = 14 * 60 + 30;
 
-  /* ---------- this profile's saved resumes ---------- */
-  const saved=store.get("shortlist-library",[]).filter(x=>x&&(x.cv||x.builder)).sort((a,b)=>(b.date||0)-(a.date||0));
-  const builder=store.get("shortlist-builder",null);
-  const builderText=builder&&builder.text?builder.text:"";
-  const library=builderText.trim()?[{id:"__builder",family:"",name:"Current resume (Build PDF)",title:"",builder:builderText},...saved]:saved;
-  const prefs=store.get("jobs-prefs",{});
-  $("resume").innerHTML=library.length
-    ? library.map(x=>`<option value="${esc(x.id)}">${esc(x.family?x.family+": ":"")}${esc(x.name||"Untitled")}</option>`).join("")
-    : `<option value="">Pasted resume text</option>`;
-  if(prefs.resume&&library.some(x=>x.id===prefs.resume)) $("resume").value=prefs.resume;
-  if(!library.length){ $("pasteBox").classList.add("on"); $("pasted").value=store.get("jobs-resume",""); }
-  if(prefs.yrs!=null) $("yrs").value=prefs.yrs;
-  if(prefs.sort) $("sort").value=prefs.sort;
-  $("hideNo").checked=!!prefs.hideNo;
-  function resumeText(){
-    if(!library.length) return $("pasted").value;
-    const x=library.find(v=>v.id===$("resume").value)||library[0];
-    return (x.cv||"")+"\n"+(x.builder||"");
-  }
+  let initialized = false;
+  let lyricLines = [];
 
-  /* ---------- what to search: starts from the titles in this profile's saved resumes ---------- */
-  const cleanTitle=t=>String(t||"").split(/[,|(]/)[0].replace(/\s+/g," ").trim().toLowerCase();
-  const ROLE=/\b((?:(?:Assistant|Associate|Senior|Junior|Lead|Graduate|Field|Site|Business|Technical|Digital|Product|Program|Project|Construction|Operations|Marketing|Content|Brand|Data|Business Operations|Supply Chain|Procurement|Quality|Safety|HR|Talent|Sales|Account|Customer|Financial|Research|UX|Design|Social Media|Communications|Events?)\s+){1,3}(?:Manager|Engineer|Coordinator|Analyst|Specialist|Associate|Consultant|Lead|Planner|Estimator|Scheduler|Designer|Strategist|Executive|Administrator|Officer))\b/g;
-  const FIELD="Paid|Integrated|Account|Client|Servicing|E-commerce|Ecommerce|Marketing|Digital|Media|Planning|Business|Strategy|Brand|Branding|Content|Sales|Operations|Product|Communications|Partnerships|Growth|Performance|Social|Retail|Project|Program|Programme|Finance|Design|Research|Analytics|Events|Projects|Construction|Engineering|Procurement|Supply|Chain|Customer|Success|Talent|Acquisition|Marketing Communications";
-  const FLIP=new RegExp("\\b((?:Assistant |Associate |Senior |Deputy )?(?:Manager|Lead|Head|Executive|Specialist|Director)),\\s+((?:"+FIELD+")(?:\\s+(?:&\\s+|and\\s+)?(?:"+FIELD+")){0,2})\\b","g");
-  const GENERIC=new Set(["assistant","associate","senior","junior","lead","manager","executive","specialist","officer","administrator","consultant","engineer","analyst","coordinator","designer"]);
-  const ADJ=new Set(["digital","integrated","performance","brand","product","content","growth","social","retail","luxury","b2b","b2c","field","influencer","email","lifecycle","event","trade"]);
-  function titlesFrom(text){
-    const n=new Map(), T=String(text||"");
-    const bump=t=>{ const k=cleanTitle(t); const w=k.split(" "); if(w.length>=2&&k.length<50&&!w.every(x=>GENERIC.has(x))) n.set(k,(n.get(k)||0)+1); };
-    (T.match(ROLE)||[]).forEach(bump);
-    for(const m of T.matchAll(FLIP)) bump(m[2].replace(/\s+(and|&)$/i,"")+" "+m[1].replace(/^(Assistant|Associate|Senior|Deputy) /,"").toLowerCase()); // "Manager, Marketing" -> "marketing manager"
-    const FN=/(marketing|media|planning|sales|operations|strategy|communications|partnerships|e-commerce|ecommerce|merchandising|design|engineering|management|analytics|product|finance|research)$/i;
-    for(const open of T.matchAll(/open to ([a-z ,&-]{4,80}?) (roles|positions|opportunities)/gi)){ // "Open to digital, media and integrated marketing roles"
-      const parts=open[1].split(/,\s*|\s+and\s+|\s*&\s*/).map(x=>x.trim()).filter(Boolean); const tail=parts[parts.length-1].split(" ").slice(-1)[0];
-      parts.forEach(x=>{ if(!x.includes(" ")&&x!==tail&&!ADJ.has(x.toLowerCase())) return; const t=cleanTitle(x.includes(" ")||x===tail?x:x+" "+tail); if(FN.test(t)) n.set(t,(n.get(t)||0)+3); }); }
-    return [...n.entries()].sort((a,b)=>b[1]-a[1]).map(([t])=>t);
-  }
-  // Titles to search, found automatically: saved-resume targets first, then roles named in the resume, then the portfolio.
-  function autoTitles(){
-    const out=[];
-    const add=t=>{ t=cleanTitle(t); if(t.length>2&&t.length<60&&!out.includes(t)) out.push(t); };
-    saved.forEach(x=>add(x.title));
-    const headline=(builderText.match(/^>\s*(.+)$/m)||[])[1]||"";
-    const roleLines=builderText.split("\n").filter(l=>/^(===|---)/.test(l)).join("\n");
-    [...titlesFrom(headline),...titlesFrom(roleLines),...titlesFrom(saved.map(x=>x.cv||"").join("\n"))].forEach(add);
-    if(portfolio) titlesFrom(portfolio.text).forEach(add);
-    if(!out.length) saved.forEach(x=>add(x.family));
-    return out.slice(0,4);
-  }
-  function autoWhere(){
-    const contact=(builderText.split("\n").find((l,i,a)=>i>0&&/^#\s/.test(a[i-1]))||"")+" "+saved.map(x=>x.cv||"").join(" ").slice(0,600);
-    const m=contact.match(/\b([A-Z][a-z]+(?: [A-Z][a-z]+)?),\s?(A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])\b/);
-    if(m) return `${m[1]}, ${m[2]}`;
-    const any=contact+" "+(portfolio?portfolio.text.slice(-400):"");
-    const city=any.match(/\b(Mumbai|Pune|Bengaluru|Bangalore|Delhi|New Delhi|Gurugram|Gurgaon|Noida|Hyderabad|Chennai|Kolkata|Ahmedabad|London|Toronto|Sydney|Singapore|Dubai)\b/);
-    return city?city[1]:"Boston, MA";
-  }
-  const IN_CITY=/\b(mumbai|pune|bengaluru|bangalore|delhi|gurugram|gurgaon|noida|hyderabad|chennai|kolkata|ahmedabad|india)\b/i;
-  function autoCountry(where){ return IN_CITY.test(where)?"in":/london|uk\b|england/i.test(where)?"gb":/toronto|canada/i.test(where)?"ca":/sydney|australia/i.test(where)?"au":/singapore/i.test(where)?"sg":"us"; }
-  let portfolio=store.get("portfolio",null);
-  let search=store.get("jobs-search",null);
-  if(!search||search.auto||!(search.titles&&search.titles.length)){ const w=search&&search.where||autoWhere(); search={titles:autoTitles(),where:w,country:search&&search.country||autoCountry(w),boards:search&&search.boards||"",auto:true}; }
-  if(!search.country) search.country=autoCountry(search.where||"");
-  $("where").value=search.where||""; $("boards").value=search.boards||""; $("country").value=search.country;
-  const usOnly=()=>{ const us=$("country").value==="us"; $("hideNo").closest("label").style.display=us?"":"none"; };
-  function drawTitles(){
-    $("tChips").innerHTML=search.titles.length
-      ? search.titles.map((t,i)=>`<span>${esc(t)}<button type="button" data-rm="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join("")
-      : `<p class="hint">No job titles found in your resume or portfolio yet. Add one here, or fill in Build PDF in Resume tools.</p>`;
-    $("tAuto").textContent=search.auto&&search.titles.length?"Found automatically in your resume and portfolio. Remove or add titles to choose your own.":"";
-  }
-  function saveSearch(){ search.where=$("where").value.trim(); search.country=$("country").value; search.boards=$("boards").value; store.set("jobs-search",search); }
-  $("tChips").addEventListener("click",e=>{ const i=e.target.dataset&&e.target.dataset.rm; if(i==null) return; search.titles.splice(Number(i),1); search.auto=false; saveSearch(); drawTitles(); });
-  function addTitle(){ const t=cleanTitle($("tIn").value); if(!t) return; if(!search.titles.includes(t)){ if(search.titles.length>=6){ toast("Up to 6 titles. Remove one first."); return; } search.titles.push(t); search.auto=false; } $("tIn").value=""; saveSearch(); drawTitles(); }
-  $("tAdd").onclick=addTitle; $("tIn").addEventListener("keydown",e=>{ if(e.key==="Enter") addTitle(); });
-  $("where").addEventListener("change",saveSearch); $("country").addEventListener("change",()=>{ saveSearch(); usOnly(); render(); }); usOnly(); $("boards").addEventListener("change",saveSearch);
-  drawTitles();
-
-  /* ---------- this profile's portfolio, kept in sync automatically ---------- */
-  const sameUrl=(a,b)=>String(a||"").toLowerCase().replace(/^https?:\/\/(www\.)?/,"").replace(/\/+$/,"")===String(b||"").toLowerCase().replace(/^https?:\/\/(www\.)?/,"").replace(/\/+$/,"");
-  async function syncPortfolio(){
-    let url=null, why="";
-    try{ const r=await fetch("/api/profile",{credentials:"same-origin"});
-      if(r.status===404) why="The /api files aren’t deployed yet. Check the api folder is in your repo.";
-      else { const j=await r.json().catch(()=>({})); url=j.portfolio||null; why=j.reason||(r.ok?"":"Profile check failed (HTTP "+r.status+")."); }
-    }catch(e){ why="Couldn’t reach /api/profile."; }
-    if(!url&&portfolio&&portfolio.url) url=portfolio.url; // address saved in Resume tools
-    if(!url){ const m=builderText.match(/\]\((https?:\/\/[^)\s]+)\)/g)||[]; const u=m.map(x=>x.slice(2,-1)).find(u=>!/linkedin|github|mailto/i.test(u)); if(u) url=u.replace(/^http:/,"https:"); }
-    if(!url){ $("pfLine").textContent="No portfolio found for this profile. "+why; return; }
-    const stale=!portfolio||!sameUrl(portfolio.url,url)||Date.now()-new Date(portfolio.fetched).getTime()>DAY;
-    if(stale){
-      try{ const r=await fetch("/__portfolio?url="+encodeURIComponent(url),{credentials:"same-origin"}); const j=await r.json();
-        if(j.ok){ portfolio={url:j.url,text:j.text,fetched:j.fetched}; store.set("portfolio",portfolio); }
-      }catch(e){}
+  function startSong() {
+    if (song.paused) {
+      song.play().then(function () {
+        musicStatus.textContent = "Playing our song ♡";
+      }).catch(function () {
+        musicStatus.textContent = "Tap anywhere to start our song ♡";
+      });
     }
-    $("pfLine").textContent=portfolio&&sameUrl(portfolio.url,url)?`Scoring also uses your portfolio (${url.replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,"")}), synced ${new Date(portfolio.fetched).toLocaleDateString()}.`:`Couldn’t sync your portfolio right now. Scores use your resume only.`;
   }
 
-  /* ---------- quick score ---------- */
-  const TERMS=["project management","program management","construction management","project controls","scheduling","schedule","cost control","budgeting","budget","forecasting","estimating","cost estimating","change orders","rfi","submittals","punch list","closeout","preconstruction","bidding","procurement","subcontractor","vendor management","contract administration","contracts","risk management","quality control","qa/qc","safety","osha","site visits","owner's representative","general contractor","commercial construction","design coordination","permitting","leed","sustainability","stakeholder management","stakeholder","client relations","cross-functional","process improvement","lean","six sigma","sop","kpi","reporting","data analysis","analytics","dashboards","resource planning","capacity planning","go-to-market","operations","agile","scrum","waterfall","earned value","critical path","wbs","pmp","capm","procore","primavera","p6","ms project","microsoft project","smartsheet","bluebeam","autocad","revit","bim","navisworks","jira","asana","confluence","excel","power bi","tableau","sql","python","salesforce","sap","civil engineering","structural","mep","infrastructure","public-private partnership","ppp","communication","leadership","negotiation","documentation","compliance","audit","marketing","digital marketing","integrated marketing","performance marketing","media planning","media buying","programmatic","paid social","paid media","google ads","meta ads","google analytics","influencer","influencer marketing","creators","content","social media","seo","sem","e-commerce","ecommerce","d2c","retail","luxury","premium","brand partnerships","partnerships","activations","experiential","events","pr","crm","loyalty","consumer insights","marketing communication","atl","btl","branding","campaigns","market research","customer experience","customer service","sales","crm","hubspot","figma","adobe","canva","ux","research","healthcare","finance","accounting","hr","recruiting","training","event planning","copywriting","editing"];
-  const norm=s=>" "+String(s||"").toLowerCase().replace(/[^a-z0-9+/#.' -]+/g," ").replace(/\s+/g," ")+" ";
-  const has=(hay,t)=>hay.includes(" "+t+" ")||hay.includes(" "+t+"s ")||hay.includes(" "+t+",")||hay.includes(" "+t+".");
-  function score(job,cvN,pfN,yrs){
-    const jd=norm(job.title+" "+job.description);
-    const want=TERMS.filter(t=>has(jd,t));
-    const hit=want.filter(t=>has(cvN,t));
-    const onPortfolio=want.filter(t=>!has(cvN,t)&&has(pfN,t)); // you have it, this resume doesn't say it
-    const miss=want.filter(t=>!has(cvN,t)&&!has(pfN,t));
-    const cover=(hit.length+.6*onPortfolio.length+1)/(want.length+2);
-    const title=search.titles.some(t=>t.split(" ").every(w=>job.title.toLowerCase().includes(w)))?1:.4;
-    let exp=1; if(job.years&&job.years.min>yrs) exp=Math.max(0,1-(job.years.min-yrs)*.25);
-    return {value:Math.round(100*(.65*cover+.2*title+.15*exp)),hit,miss,onPortfolio,thin:job.descriptionTruncated||want.length<4};
+  function initializeSong() {
+    if (initialized) return;
+    initialized = true;
+
+    // Set the starting position to zero only once.
+    try {
+      song.currentTime = 0;
+    } catch (_) {}
+
+    startSong();
   }
 
-  /* ---------- this profile's job results ---------- */
-  let cache=store.get("jobs-cache",{fetched:null,jobs:[],key:""});
-  const searchKey=()=>JSON.stringify([search.titles,search.where,search.country,search.boards]);
-  async function refresh(manual){
-    saveSearch();
-    if(!search.titles.length){ $("sStatus").textContent="Add a job title first."; render(); return; }
-    $("refresh").disabled=true; $("refresh").textContent="Searching…"; $("sStatus").textContent="";
-    try{
-      const boards=search.boards.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
-      const r=await fetch("/api/search",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({titles:search.titles,where:search.where,country:search.country,boards})});
-      const j=await r.json().catch(()=>({ok:false,error:"The search didn’t return results."}));
-      if(!j.ok) throw new Error(j.error||"Search failed.");
-      cache={fetched:j.fetched,jobs:j.jobs,key:searchKey()};
-      if(!store.set("jobs-cache",cache)){ cache.jobs=cache.jobs.map(x=>({...x,description:x.description.slice(0,1500)})); store.set("jobs-cache",cache); }
-      $("sStatus").textContent=`Found ${j.jobs.length} job${j.jobs.length===1?"":"s"}.`+(j.notes&&j.notes.length?" Skipped: "+j.notes.join("; "):"");
-    }catch(e){ $("sStatus").textContent=e.message+(cache.jobs.length?" Showing your last results.":""); }
-    $("refresh").disabled=false; $("refresh").textContent="Refresh jobs";
-    render();
-  }
-  $("refresh").onclick=()=>refresh(true);
+  song.addEventListener("loadedmetadata", initializeSong, { once: true });
+  song.addEventListener("canplay", initializeSong, { once: true });
 
-  const ago=d=>{ if(!d) return ""; const days=Math.floor((Date.now()-new Date(d))/DAY); return days<=0?"Today":days===1?"Yesterday":`${days} days ago`; };
-  const SP={no:["sp-no","No sponsorship"],yes:["sp-yes","Sponsors visas"],clearance:["sp-clearance","Citizenship or clearance"],unknown:["","Sponsorship not mentioned"]};
-  const band=v=>v>=80?"s-hi":v>=65?"s-mid":v>=50?"s-low":"s-bad";
-  let lastScores=new Map();
+  document.addEventListener("pointerdown", startSong, { once: true });
+  document.addEventListener("keydown", startSong, { once: true });
 
-  function render(){
-    const cvN=norm(resumeText()), pfN=norm(portfolio?portfolio.text:""), yrs=Number($("yrs").value)||0, q=$("q").value.trim().toLowerCase();
-    store.set("jobs-prefs",{resume:$("resume").value,yrs,sort:$("sort").value,hideNo:$("hideNo").checked});
-    if(!library.length) store.set("jobs-resume",$("pasted").value);
-    const jobs=cache.jobs||[];
-    $("updated").textContent=cache.fetched?`Searched ${new Date(cache.fetched).toLocaleString([], {dateStyle:"medium",timeStyle:"short"})}`:"";
-    if(!jobs.length){ $("count").textContent=""; $("list").innerHTML=`<li class="empty"><b>No jobs yet.</b><br>Check the titles and location above, then choose “Refresh jobs”.</li>`; return; }
-
-    const noResume=cvN.trim().length<40;
-    let rows=jobs.map(j=>({j,s:score(j,cvN,pfN,yrs)}));
-    lastScores=new Map(rows.map(r=>[r.j.id,r.s]));
-    if(q) rows=rows.filter(({j})=>(j.title+" "+j.company+" "+j.location+" "+j.description).toLowerCase().includes(q));
-    if($("hideNo").checked&&$("country").value==="us") rows=rows.filter(({j})=>j.sponsorship?.flag!=="no");
-    const sort=$("sort").value;
-    rows.sort(sort==="date"?(a,b)=>new Date(b.j.posted||0)-new Date(a.j.posted||0)
-      :sort==="pay"?(a,b)=>(b.j.salary?.max||b.j.salary?.min||0)-(a.j.salary?.max||a.j.salary?.min||0)
-      :(a,b)=>b.s.value-a.s.value);
-    $("count").textContent=`${rows.length} of ${jobs.length} jobs`;
-    if(!rows.length){ $("list").innerHTML=`<li class="empty"><b>No jobs match these filters.</b><br>Clear the search box or untick “Hide no sponsorship”.</li>`; return; }
-
-    const kw=(arr,cls,none)=>arr.map(t=>`<span class="${cls}">${esc(t)}</span>`).join("")||none;
-    $("list").innerHTML=rows.map(({j,s})=>{
-      const sp=SP[j.sponsorship?.flag]||SP.unknown, url=safeUrl(j.url);
-      const chips=[
-        j.salary?`<li class="pay">${esc(j.salary.text)}</li>`:`<li>Pay not listed</li>`,
-        ($("country").value==="us"||j.sponsorship?.flag!=="unknown")?`<li class="${sp[0]}">${sp[1]}</li>`:"",
-        `<li>${esc(j.workplace||"")}</li>`,
-        j.years?`<li>${j.years.min}${j.years.max?"–"+j.years.max:"+"} yrs experience</li>`:"",
-        ...(j.benefits||[]).map(b=>`<li>${esc(b)}</li>`)
-      ].join("");
-      return `<li class="job">
-        <div class="score ${noResume?"":band(s.value)}">${noResume?`<b>–</b><small>add resume</small>`:`<b>${s.value}</b><small>${s.thin?"rough match":"match"}</small>`}</div>
-        <div>
-          <h2 class="jt">${esc(j.title)}</h2>
-          <p class="jc">${esc(j.company)}${j.location?", "+esc(j.location):""}${j.posted?` <span aria-hidden="true">|</span> ${ago(j.posted)}`:""}</p>
-          <ul class="chips">${chips}</ul>
-          <div class="actions">
-            <button class="primary" data-tailor="${esc(j.id)}">Tailor in Shortlist</button>
-            ${url?`<a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open posting</a>`:""}
-          </div>
-          <details><summary>Details</summary>
-            <div class="detail">
-              <div><h3>On this resume (${s.hit.length})</h3><div class="kw">${kw(s.hit,"hit","None found")}</div></div>
-              <div><h3>Missing from this resume (${s.miss.length+s.onPortfolio.length})</h3><div class="kw">${kw(s.onPortfolio,"pf","")}${kw(s.miss,"miss",s.onPortfolio.length?"":"None")}</div>
-                ${s.onPortfolio.length?`<p class="hint">Purple ones are on your portfolio. Add them to this resume when you tailor.</p>`:""}</div>
-              ${j.sponsorship?.note?`<div><h3>Sponsorship line</h3><p>${esc(j.sponsorship.note)}</p></div>`:""}
-              ${j.descriptionTruncated?`<div><h3>Short preview only</h3><p>This source only shares the first few lines, so the score is rough. Open the posting for the full description.</p></div>`:""}
-              <div class="desc">${esc(j.description)}</div>
-            </div>
-          </details>
-        </div>
-      </li>`;
-    }).join("");
+  if (song.readyState >= 1) {
+    initializeSong();
   }
 
-  /* ---------- hand-off to Resume tools (same profile) ---------- */
-  $("list").addEventListener("click",e=>{
-    const id=e.target.dataset&&e.target.dataset.tailor; if(!id) return;
-    const j=(cache.jobs||[]).find(x=>x.id===id); if(!j) return;
-    const s=lastScores.get(id)||{onPortfolio:[]};
-    const prev=store.get("rs-state",{})||{};
-    const full=!j.descriptionTruncated;
-    store.set("rs-state",{...prev,jd:full?j.description:"",title:j.title,company:j.company,keywords:[]});
-    const notes=[];
-    if(!full){ const url=safeUrl(j.url); if(url) window.open(url,"_blank","noopener"); notes.push("This listing only had a short preview. Copy the full description from the posting and paste it here."); }
-    if(s.onPortfolio.length) notes.push(`Your portfolio shows ${s.onPortfolio.join(", ")}, which this job asks for and your resume doesn’t mention yet.`);
-    if(notes.length) store.set("jobs-notice",notes.join(" "));
-    location.href="/#paste";
+  fetch("/lyrics.txt", { cache: "no-cache" })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Lyrics unavailable");
+      return response.text();
+    })
+    .then(function (text) {
+      lyricLines = text
+        .split(/\\r?\\n/)
+        .map(function (line) { return line.trim(); })
+        .filter(function (line) { return line.length > 0; });
+
+      lyricsScroll.innerHTML = "";
+
+      lyricLines.forEach(function (line, index) {
+        const paragraph = document.createElement("p");
+        paragraph.className = "lyric-line";
+        paragraph.textContent = line;
+        paragraph.dataset.index = String(index);
+        lyricsScroll.appendChild(paragraph);
+      });
+
+      updateLyrics();
+    })
+    .catch(function () {
+      lyricsScroll.innerHTML =
+        '<p class="lyric-line">Our song, our memories ♡</p>';
+    });
+
+  function updateLyrics() {
+    const currentTime = song.currentTime;
+
+    // Hide all lyrics until playback reaches 14:30.
+    if (currentTime < LYRICS_START_AT) {
+      lyricsScroll.classList.remove("started");
+      return;
+    }
+
+    lyricsScroll.classList.add("started");
+
+    const elements = lyricsScroll.querySelectorAll(".lyric-line");
+    if (!elements.length) return;
+
+    const duration = Number.isFinite(song.duration)
+      ? song.duration
+      : LYRICS_START_AT + 1;
+
+    const remainingDuration = Math.max(1, duration - LYRICS_START_AT);
+    const progress = Math.min(
+      0.9999,
+      Math.max(0, (currentTime - LYRICS_START_AT) / remainingDuration)
+    );
+
+    const activeIndex = Math.min(
+      elements.length - 1,
+      Math.floor(progress * elements.length)
+    );
+
+    elements.forEach(function (element, index) {
+      element.classList.toggle("active", index === activeIndex);
+      element.classList.toggle("past", index < activeIndex);
+    });
+  }
+
+  song.addEventListener("timeupdate", updateLyrics);
+  song.addEventListener("seeked", updateLyrics);
+
+  // Login
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    error.style.display = "none";
+    error.textContent = "";
+    loginButton.disabled = true;
+    loginButton.textContent = "Opening...";
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const response = await fetch("/__login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+
+      if (response.ok) {
+        window.location.href = "/";
+        return;
+      }
+
+      let message = "Incorrect username or password. Try again ♡";
+
+      try {
+        const result = await response.json();
+        if (result && result.error) message = result.error;
+      } catch (_) {}
+
+      error.textContent = message;
+      error.style.display = "block";
+    } catch (_) {
+      error.textContent = "Something went wrong. Please try again.";
+      error.style.display = "block";
+    } finally {
+      loginButton.disabled = false;
+      loginButton.textContent = "Open our little world ♡";
+    }
   });
-
-  ["resume","yrs","sort","hideNo"].forEach(id=>$(id).addEventListener("change",render));
-  let t; $("q").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,150);});
-  $("pasted").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,300);});
-
-  render();
-  await syncPortfolio();
-  if(search.auto){ const t=autoTitles(); if(t.join("|")!==search.titles.join("|")){ search.titles=t; saveSearch(); drawTitles(); } }
-  render();
-  // Auto refresh: once a day, or when the search changed since the last results.
-  if(search.titles.length&&(!cache.fetched||Date.now()-new Date(cache.fetched).getTime()>DAY||cache.key!==searchKey())) refresh(false);
 })();
 </script>
 </body>
-</html>
+</html>`;
