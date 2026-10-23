@@ -62,6 +62,15 @@ button:disabled{opacity:.7;cursor:wait}
 .tune svg path{fill:#FF7AA8}
 .tune[aria-pressed="true"] svg{animation:beat 1.1s ease-in-out infinite}
 .tune:hover{background:#FFEDF4}
+.lyrics-panel{display:none;position:fixed;z-index:5;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(520px,calc(100vw - 28px));max-height:42vh;overflow:hidden;border:1px solid #F2D5E1;border-radius:18px;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);box-shadow:0 16px 45px rgba(110,55,95,.18);padding:14px 16px 12px}
+.lyrics-panel.open{display:block}
+.lyrics-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;color:#B5577D;font:italic 18px "Newsreader",Georgia,serif}
+.lyrics-close{width:32px;height:32px;margin:0;padding:0;background:#FFF0F6;color:#B5577D;box-shadow:none;border-radius:50%;font:20px sans-serif}
+.lyrics-scroll{max-height:calc(42vh - 92px);overflow:auto;text-align:center;padding:8px 4px 16px;scroll-behavior:smooth}
+.lyric-line{margin:7px 0;color:#A5A0AA;font:italic 18px/1.4 "Newsreader",Georgia,serif;transition:color .25s,transform .25s,opacity .25s}
+.lyric-line.active{color:#B5577D;transform:scale(1.025);font-weight:600}
+.lyrics-note{font:11px/1.4 "Instrument Sans",sans-serif;color:#9690A0;text-align:center;margin:6px 0 0}
+@media(max-height:760px){body{height:auto;min-height:100%;overflow-y:auto;align-items:start;padding-top:18px;padding-bottom:18px}.card{margin:auto;padding:22px 24px 18px}.note{margin-top:16px}.lyrics-panel{max-height:34vh}.lyrics-scroll{max-height:calc(34vh - 92px)}}
 .sparkle{position:fixed;pointer-events:none;font-size:14px;color:#FF9EC4;animation:pop 1.6s ease-out forwards}
 @keyframes pop{from{opacity:.9;transform:translateY(0) scale(.6)}to{opacity:0;transform:translateY(-70px) scale(1.2)}}
 
@@ -91,7 +100,17 @@ button:disabled{opacity:.7;cursor:wait}
       <span class="w loved" style="animation-delay:2s">loved</span><br>
       <span class="w always" style="animation-delay:2.4s" aria-hidden="true">alw<svg class="heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.1 0 3.6 1.2 4.4 2.5h1.6c.8-1.3 2.3-2.5 4.4-2.5 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg>ys<svg class="line" viewBox="0 0 200 14" preserveAspectRatio="none"><path d="M4 9 C 40 2, 80 13, 120 6 S 180 4, 196 8"/></svg></span>
     </p>
+  <button class="tune" id="tune" type="button" aria-pressed="false" aria-label="Play our tune">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.1 0 3.6 1.2 4.4 2.5h1.6c.8-1.3 2.3-2.5 4.4-2.5 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg>
+    <span id="tune-label">our tune</span>
+  </button>
 </main>
+<audio id="song" preload="metadata" src="/vimlesh.mp3"></audio>
+<section class="lyrics-panel" id="lyrics-panel" aria-label="Song lyrics">
+  <div class="lyrics-top"><span>sing along, Dimpoo ♡</span><button class="lyrics-close" id="lyrics-close" type="button" aria-label="Close lyrics">×</button></div>
+  <div class="lyrics-scroll" id="lyrics-scroll"><p class="lyric-line">Loading lyrics…</p></div>
+  <p class="lyrics-note">Line highlighting follows the song approximately.</p>
+</section>
 <div class="welcome" id="welcome"></div>
 <script>
 (function(){
@@ -101,6 +120,35 @@ button:disabled{opacity:.7;cursor:wait}
   if(!(window.CSS&&CSS.supports&&CSS.supports("-webkit-text-security","disc"))){ p.type="password"; p.setAttribute("autocomplete","new-password"); p.classList.remove("masked"); }
   var hearts=document.getElementById("hearts"), sym=["♥","♡","✦"];
   for(var i=0;i<18;i++){ var s=document.createElement("span"); s.textContent=sym[i%3]; s.style.left=(Math.random()*100)+"vw"; s.style.color=["#FF9EC4","#B58CFF","#9DB0FF"][i%3]; s.style.fontSize=(12+Math.random()*16)+"px"; s.style.animationDuration=(10+Math.random()*12)+"s"; s.style.animationDelay=(Math.random()*10)+"s"; hearts.appendChild(s); }
+  var tune=document.getElementById("tune"), song=document.getElementById("song"), tuneLabel=document.getElementById("tune-label");
+  var lyricsPanel=document.getElementById("lyrics-panel"), lyricsScroll=document.getElementById("lyrics-scroll"), lyricsClose=document.getElementById("lyrics-close");
+  var lyricLines=[], activeLyric=-1;
+  fetch("/lyrics.txt").then(function(r){ if(!r.ok) throw new Error("lyrics unavailable"); return r.text(); }).then(function(t){
+    lyricLines=t.split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean);
+    lyricsScroll.textContent="";
+    lyricLines.forEach(function(line,i){ var el=document.createElement("p"); el.className="lyric-line"; el.textContent=line; el.dataset.index=i; lyricsScroll.appendChild(el); });
+  }).catch(function(){ lyricsScroll.textContent="Lyrics couldn't load. Please refresh the page."; });
+  tune.addEventListener("click",function(){
+    lyricsPanel.classList.add("open");
+    if(song.paused){
+      song.play().then(function(){ tune.setAttribute("aria-pressed","true"); tuneLabel.textContent="pause our tune"; tune.setAttribute("aria-label","Pause our tune"); })
+      .catch(function(){ tuneLabel.textContent="tap to play our tune"; });
+    } else { song.pause(); }
+  });
+  song.addEventListener("pause",function(){ tune.setAttribute("aria-pressed","false"); tuneLabel.textContent="our tune"; tune.setAttribute("aria-label","Play our tune"); });
+  song.addEventListener("play",function(){ tune.setAttribute("aria-pressed","true"); tuneLabel.textContent="pause our tune"; tune.setAttribute("aria-label","Pause our tune"); });
+  song.addEventListener("ended",function(){ tune.setAttribute("aria-pressed","false"); tuneLabel.textContent="play our tune again"; tune.setAttribute("aria-label","Play our tune again"); });
+  lyricsClose.addEventListener("click",function(){ lyricsPanel.classList.remove("open"); });
+  song.addEventListener("timeupdate",function(){
+    if(!lyricLines.length || !song.duration) return;
+    var next=Math.min(lyricLines.length-1,Math.floor((song.currentTime/song.duration)*lyricLines.length));
+    if(next===activeLyric) return;
+    activeLyric=next;
+    var all=lyricsScroll.querySelectorAll(".lyric-line");
+    all.forEach(function(el,i){ el.classList.toggle("active",i===next); });
+    var current=all[next];
+    if(current) current.scrollIntoView({block:"center",behavior:"smooth"});
+  });
   function submit(){
     if(!u.value.trim()||!p.value){ err.textContent="Enter your username and password."; return; }
     go.disabled=true; err.textContent="";
