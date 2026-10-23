@@ -233,6 +233,7 @@ h1 {
   font-weight: 600;
   line-height: 1.1;
   color: var(--wine-2);
+  margin-bottom: 14px;
 }
 
 .card-intro {
@@ -794,10 +795,7 @@ input:focus {
   <section class="login-card">
     <svg class="card-rose" aria-hidden="true"><use href="#rose"/></svg>
 
-    <h2 class="card-title">Welcome back</h2>
-    <p class="card-intro">
-      Towards greatness.
-    </p>
+    <h2 class="card-title">Towards greatness.</h2>
 
     <form id="loginForm">
       <label for="username">Username</label>
@@ -850,6 +848,11 @@ input:focus {
 
   var lyricLines = [];
   var shownLines = 0;
+
+  // Show the title, mirror and threads right away instead of waiting for the song
+  requestAnimationFrame(function () {
+    story.classList.add("visible");
+  });
 
   function updatePage() {
     if (song.currentTime >= CONTENT_START_AT) {
