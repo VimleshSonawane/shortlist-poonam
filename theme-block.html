@@ -1,0 +1,325 @@
+<!-- ===== THEME: real-looking petals, gilded mirror, red string of fate ===== -->
+<style>
+/* hide the old drawings; the new ones take their place */
+#petalCanvas, .mirror-stage > svg.mirror, #mirrorCanvas { display: none !important; }
+
+#petalsReal { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+#fateThread { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: visible; }
+
+.mirror-real { width: 100%; max-width: 380px; height: auto; max-height: 560px; overflow: visible;
+  filter: drop-shadow(0 26px 30px rgba(20,0,8,.55)); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+.mirror-real .sheen { animation: mrSheen 9s ease-in-out infinite; }
+@keyframes mrSheen { 0%, 60% { transform: translateX(-260px) skewX(-18deg); } 100% { transform: translateX(260px) skewX(-18deg); } }
+.mirror-real .flicker { animation: mrFlicker 3.4s ease-in-out infinite alternate; }
+@keyframes mrFlicker { 0% { opacity: .78; } 45% { opacity: 1; } 70% { opacity: .86; } 100% { opacity: .96; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #petalsReal { display: none; }
+  .mirror-real .sheen, .mirror-real .flicker { animation: none; }
+}
+</style>
+
+<canvas id="petalsReal" aria-hidden="true"></canvas>
+<svg id="fateThread" aria-hidden="true">
+  <defs>
+    <filter id="ftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#ftGlow)">
+    <path id="ftBase" fill="none" stroke="#a8001a" stroke-width="2.4" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    <path id="ftTwist" fill="none" stroke="#ff4d63" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="1.4 2.6" opacity="0"/>
+    <path id="ftShine" fill="none" stroke="#ffd0d6" stroke-width=".55" stroke-linecap="round" opacity="0"/>
+    <g id="ftKnotA" opacity="0"></g>
+    <g id="ftKnotB" opacity="0"></g>
+  </g>
+</svg>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var NS = "http://www.w3.org/2000/svg";
+
+  /* ---------------- 1. Gilded floor mirror ---------------- */
+  var stage = document.getElementById("mirrorStage");
+  if (stage) {
+    var M = [
+      '<svg class="mirror-real" viewBox="0 0 300 660" role="img" aria-label="An antique gilded floor mirror">',
+      '<defs>',
+      '<linearGradient id="mrGold" x1="0" y1="0" x2="1" y2="1">',
+      '<stop offset="0" stop-color="#fbe5a6"/><stop offset=".22" stop-color="#d8a648"/><stop offset=".45" stop-color="#8f5e1f"/>',
+      '<stop offset=".62" stop-color="#e7bf6a"/><stop offset=".82" stop-color="#9c6a24"/><stop offset="1" stop-color="#f0cf7e"/></linearGradient>',
+      '<filter id="mrRelief" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">',
+      '<feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="h"/>',
+      '<feDiffuseLighting in="h" surfaceScale="4" diffuseConstant="1.15" lighting-color="#ffe6b0" result="d"><feDistantLight azimuth="235" elevation="48"/></feDiffuseLighting>',
+      '<feComposite in="d" in2="SourceAlpha" operator="in" result="d2"/>',
+      '<feBlend in="SourceGraphic" in2="d2" mode="multiply" result="lit"/>',
+      '<feSpecularLighting in="h" surfaceScale="5" specularConstant="1.25" specularExponent="26" lighting-color="#fff6dc" result="s"><fePointLight x="-60" y="-120" z="260"/></feSpecularLighting>',
+      '<feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>',
+      '<feComposite in="lit" in2="s2" operator="arithmetic" k1="0" k2="1" k3=".85" k4="0"/>',
+      '</filter>',
+      '<filter id="mrSoft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.6"/></filter>',
+      '<filter id="mrBokeh" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4"/></filter>',
+      '<radialGradient id="mrSilver" cx="50%" cy="45%" r="70%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#1d2a22" stop-opacity=".42"/></radialGradient>',
+      '<linearGradient id="mrRoom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2e6cf"/><stop offset=".55" stop-color="#e2cfab"/><stop offset=".78" stop-color="#b99a6c"/><stop offset="1" stop-color="#7d5d3a"/></linearGradient>',
+      '<linearGradient id="mrWin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffdf4"/><stop offset="1" stop-color="#f7e7c2"/></linearGradient>',
+      '<linearGradient id="mrSheenG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>',
+      '<radialGradient id="mrGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff4cf" stop-opacity=".95"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>',
+      '<clipPath id="mrGlass"><path d="M78 590 V214 C78 140 108 124 150 124 C192 124 222 140 222 214 V590 Q222 604 208 604 H92 Q78 604 78 590 Z"/></clipPath>',
+      '</defs>',
+      /* floor shadow */
+      '<ellipse cx="150" cy="648" rx="120" ry="9" fill="#000" opacity=".4" filter="url(#mrSoft)"/>',
+      /* glass: a softly focused warm room, like a real reflection */
+      '<g clip-path="url(#mrGlass)">',
+      '<rect x="70" y="100" width="160" height="520" fill="url(#mrRoom)"/>',
+      '<g filter="url(#mrSoft)">',
+      '<path d="M96 360 V250 Q96 214 122 206 Q148 214 148 250 V360 Z" fill="url(#mrWin)"/>',
+      '<path d="M100 356 V252 Q100 220 122 213 Q144 220 144 252 V356 Z" fill="#fffef8" opacity=".9"/>',
+      '<rect x="160" y="230" width="58" height="150" fill="#d9c39c" opacity=".55"/>',
+      '<rect x="84" y="440" width="132" height="70" rx="16" fill="#eadfca" opacity=".8"/>',
+      '<rect x="92" y="420" width="44" height="40" rx="12" fill="#f3eadb"/><rect x="164" y="420" width="44" height="40" rx="12" fill="#f3eadb"/>',
+      '<ellipse cx="150" cy="520" rx="52" ry="9" fill="#c9b18a" opacity=".7"/>',
+      '<rect x="104" y="526" width="4" height="40" fill="#a98450"/><rect x="192" y="526" width="4" height="40" fill="#a98450"/>',
+      '<path d="M138 500 Q150 470 162 500 Z" fill="#dfe8d6" opacity=".8"/><circle cx="150" cy="468" r="16" fill="#f6f1e2" opacity=".9"/>',
+      '<rect x="70" y="566" width="160" height="44" fill="#8a6a44" opacity=".55"/>',
+      '</g>',
+      /* chandelier: warm points of light */
+      '<g class="flicker">',
+      '<ellipse cx="150" cy="232" rx="54" ry="40" fill="url(#mrGlow)" opacity=".7"/>',
+      '<g fill="#fff3cf" filter="url(#mrBokeh)">',
+      '<circle cx="120" cy="226" r="3.2"/><circle cx="135" cy="220" r="3.2"/><circle cx="150" cy="216" r="3.4"/><circle cx="165" cy="220" r="3.2"/><circle cx="180" cy="226" r="3.2"/>',
+      '<circle cx="128" cy="244" r="2.2"/><circle cx="150" cy="248" r="2.4"/><circle cx="172" cy="244" r="2.2"/>',
+      '<circle cx="138" cy="258" r="1.6"/><circle cx="150" cy="262" r="1.8"/><circle cx="162" cy="258" r="1.6"/>',
+      '</g>',
+      '<path d="M150 150 V212" stroke="#b58a46" stroke-width="1" opacity=".6"/>',
+      '</g>',
+      /* aged silvering and a slow light sweep */
+      '<rect x="70" y="100" width="160" height="520" fill="url(#mrSilver)"/>',
+      '<g opacity=".18" fill="#3b2a18" filter="url(#mrSoft)"><circle cx="96" cy="560" r="6"/><circle cx="210" cy="300" r="4"/><circle cx="200" cy="585" r="7"/><circle cx="88" cy="190" r="4"/></g>',
+      '<rect class="sheen" x="40" y="80" width="70" height="560" fill="url(#mrSheenG)"/>',
+      '</g>',
+      /* inner shadow where the glass meets the frame */
+      '<path d="M78 590 V214 C78 140 108 124 150 124 C192 124 222 140 222 214 V590 Q222 604 208 604 H92 Q78 604 78 590 Z" fill="none" stroke="#1b0c04" stroke-width="5" opacity=".55" filter="url(#mrSoft)"/>',
+      /* the carved gilt frame, lit by the relief filter */
+      '<g id="mrFrame" filter="url(#mrRelief)" fill="url(#mrGold)">',
+      '<path fill-rule="evenodd" d="M44 600 V206 C44 109 89 88 150 88 C211 88 256 109 256 206 V600 Q256 630 226 632 H74 Q44 630 44 600 Z',
+      ' M78 590 V214 C78 140 108 124 150 124 C192 124 222 140 222 214 V590 Q222 604 208 604 H92 Q78 604 78 590 Z"/>',
+      '</g>',
+      '</svg>'
+    ].join("");
+    stage.insertAdjacentHTML("beforeend", M);
+    var svg = stage.querySelector(".mirror-real");
+    var frame = svg.querySelector("#mrFrame");
+    function el(tag, attrs) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+    /* raised moulding lines along the frame */
+    frame.appendChild(el("path", { d: "M52 598 V207 C52 116 93 96 150 96 C207 96 248 116 248 207 V598 Q248 622 224 624 H76 Q52 622 52 598 Z", fill: "none", stroke: "url(#mrGold)", "stroke-width": "4" }));
+    frame.appendChild(el("path", { d: "M70 592 V212 C70 133 104 116 150 116 C196 116 230 133 230 212 V592 Q230 610 212 611 H88 Q70 610 70 592 Z", fill: "none", stroke: "url(#mrGold)", "stroke-width": "3.2" }));
+
+    /* beading along the inner edge */
+    var guide = el("path", { d: "M62 594 V210 C62 125 99 106 150 106 C201 106 238 125 238 210 V594 Q238 616 218 617 H82 Q62 616 62 594 Z" });
+    svg.appendChild(guide);
+    var L = guide.getTotalLength();
+    for (var i = 0; i < 150; i++) {
+      var p = guide.getPointAtLength(i / 150 * L);
+      frame.appendChild(el("circle", { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: "2.1" }));
+    }
+    guide.remove();
+
+    /* carved rosettes, leaves and scrolls */
+    function rosette(cx, cy, r) {
+      var g = el("g", {});
+      for (var k = 0; k < 8; k++) {
+        var a = k / 8 * Math.PI * 2;
+        g.appendChild(el("ellipse", { cx: (cx + Math.cos(a) * r * .62).toFixed(1), cy: (cy + Math.sin(a) * r * .62).toFixed(1), rx: (r * .42).toFixed(1), ry: (r * .26).toFixed(1), transform: "rotate(" + (a * 180 / Math.PI).toFixed(0) + " " + (cx + Math.cos(a) * r * .62).toFixed(1) + " " + (cy + Math.sin(a) * r * .62).toFixed(1) + ")" }));
+      }
+      g.appendChild(el("circle", { cx: cx, cy: cy, r: (r * .34).toFixed(1) }));
+      frame.appendChild(g);
+    }
+    function leaf(x, y, len, ang, w) {
+      frame.appendChild(el("path", { d: "M0 0 C" + (len * .3) + " " + (-w) + " " + (len * .75) + " " + (-w * .8) + " " + len + " 0 C" + (len * .75) + " " + (w * .5) + " " + (len * .3) + " " + (w * .7) + " 0 0 Z", transform: "translate(" + x + " " + y + ") rotate(" + ang + ")" }));
+    }
+    function scroll(x, y, s, flip) {
+      frame.appendChild(el("path", { d: "M0 0 C" + 14 * s + " " + (-2 * s) + " " + 20 * s + " " + 10 * s + " " + 10 * s + " " + 14 * s + " C" + 3 * s + " " + 16 * s + " 0 " + 9 * s + " " + 5 * s + " " + 7 * s, fill: "none", stroke: "url(#mrGold)", "stroke-width": (3.4 * s).toFixed(1), "stroke-linecap": "round", transform: "translate(" + x + " " + y + ") scale(" + (flip ? -1 : 1) + " 1)" }));
+    }
+    /* crest */
+    rosette(150, 66, 15); rosette(118, 82, 9); rosette(182, 82, 9);
+    leaf(150, 52, 30, -150, 8); leaf(150, 52, 30, -30, 8); leaf(150, 40, 18, -90, 6);
+    leaf(130, 70, 26, 200, 7); leaf(170, 70, 26, -20, 7);
+    scroll(100, 96, 1.2, true); scroll(200, 96, 1.2, false);
+    /* sides */
+    [210, 330, 450, 560].forEach(function (y, k) {
+      var r = k === 0 || k === 3 ? 8 : 6.5;
+      rosette(48, y, r); rosette(252, y, r);
+      leaf(48, y + 10, 20, 100, 5); leaf(252, y + 10, 20, 80, 5);
+      leaf(48, y - 10, 20, -100, 5); leaf(252, y - 10, 20, -80, 5);
+    });
+    /* bottom shell cartouche */
+    for (var j = 0; j < 9; j++) {
+      var a2 = Math.PI + (j / 8) * Math.PI;
+      frame.appendChild(el("ellipse", { cx: (150 + Math.cos(a2) * 15).toFixed(1), cy: (630 + Math.sin(a2) * 15).toFixed(1), rx: "5", ry: "13", transform: "rotate(" + ((a2 * 180 / Math.PI) + 90).toFixed(0) + " " + (150 + Math.cos(a2) * 15).toFixed(1) + " " + (630 + Math.sin(a2) * 15).toFixed(1) + ")" }));
+    }
+    frame.appendChild(el("ellipse", { cx: 150, cy: 634, rx: 11, ry: 7 }));
+    scroll(112, 620, 1, true); scroll(188, 620, 1, false);
+    leaf(124, 636, 26, 170, 6); leaf(176, 636, 26, 10, 6);
+
+    /* gentle tilt toward the pointer */
+    if (!reduce) {
+      window.addEventListener("pointermove", function (e) {
+        var x = (e.clientX / window.innerWidth - .5), y = (e.clientY / window.innerHeight - .5);
+        svg.style.transform = "perspective(900px) rotateY(" + (x * 7).toFixed(2) + "deg) rotateX(" + (-y * 4).toFixed(2) + "deg)";
+      });
+    }
+  }
+
+  /* ---------------- 2. Rose petals ---------------- */
+  (function () {
+    if (reduce) return;
+    var cv = document.getElementById("petalsReal"); if (!cv) return;
+    var ctx = cv.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0;
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+
+    function petalPath(g, w, h, j) {
+      g.beginPath();
+      g.moveTo(w * .5, h * .98);
+      g.bezierCurveTo(w * (.18 + j[0]), h * .9, w * .02, h * (.62 + j[1]), w * .05, h * .36);
+      g.bezierCurveTo(w * .08, h * .1, w * (.3 + j[2]), h * .02, w * .44, h * (.08 + j[3]));
+      g.quadraticCurveTo(w * .5, h * .12, w * .56, h * (.07 + j[3]));
+      g.bezierCurveTo(w * (.72 - j[2]), h * .01, w * .94, h * .12, w * .95, h * .38);
+      g.bezierCurveTo(w * .98, h * (.64 - j[1]), w * (.8 - j[0]), h * .9, w * .5, h * .98);
+      g.closePath();
+    }
+    function makePetal(back) {
+      var w = 120, h = 150, c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d");
+      var j = [rnd(-.06, .06), rnd(-.06, .06), rnd(-.06, .06), rnd(-.03, .03)];
+      petalPath(g, w, h, j); g.save(); g.clip();
+      var body = g.createLinearGradient(0, h, 0, 0);
+      if (back) { body.addColorStop(0, "#c98a3a"); body.addColorStop(.18, "#7a0814"); body.addColorStop(1, "#8e0b18"); }
+      else { body.addColorStop(0, "#f2c25a"); body.addColorStop(.1, "#d4502a"); body.addColorStop(.22, "#b80d1d"); body.addColorStop(.7, "#c8142a"); body.addColorStop(1, "#a50a18"); }
+      g.fillStyle = body; g.fillRect(0, 0, w, h);
+      /* soft light through the petal */
+      var glow = g.createRadialGradient(w * rnd(.35, .6), h * rnd(.3, .5), 4, w * .5, h * .45, w * .75);
+      glow.addColorStop(0, back ? "rgba(255,60,70,.12)" : "rgba(255,95,95,.32)"); glow.addColorStop(1, "rgba(255,60,60,0)");
+      g.fillStyle = glow; g.fillRect(0, 0, w, h);
+      /* curled edge: light on one side, shadow on the other */
+      var side = g.createLinearGradient(0, 0, w, 0);
+      side.addColorStop(0, "rgba(40,0,6,.45)"); side.addColorStop(.25, "rgba(40,0,6,0)"); side.addColorStop(.75, "rgba(255,170,170,0)"); side.addColorStop(1, back ? "rgba(255,150,150,.08)" : "rgba(255,190,190,.28)");
+      g.fillStyle = side; g.fillRect(0, 0, w, h);
+      /* veins */
+      for (var v = 0; v < 26; v++) {
+        var tx = rnd(4, w - 4);
+        g.strokeStyle = "rgba(80,0,10," + rnd(.06, .15).toFixed(2) + ")"; g.lineWidth = rnd(.5, 1.1);
+        g.beginPath(); g.moveTo(w * .5 + rnd(-4, 4), h - 4); g.quadraticCurveTo((w * .5 + tx) / 2 + rnd(-14, 14), h * .55, tx, rnd(6, 40)); g.stroke();
+      }
+      /* velvet grain */
+      for (var k = 0; k < 2200; k++) { g.fillStyle = Math.random() < .5 ? "rgba(255,120,120,.06)" : "rgba(50,0,6,.08)"; g.fillRect(rnd(0, w), rnd(0, h), 1, 1); }
+      /* darker rim and a slightly bruised tip */
+      g.lineWidth = 9; g.strokeStyle = "rgba(60,0,8,.35)"; petalPath(g, w, h, j); g.stroke();
+      g.fillStyle = "rgba(70,0,10," + rnd(0, .18).toFixed(2) + ")"; g.beginPath(); g.ellipse(w * rnd(.3, .7), h * .1, w * .2, h * .06, 0, 0, Math.PI * 2); g.fill();
+      g.restore();
+      return c;
+    }
+    function blurred(src, px) { if (!px) return src; var c = document.createElement("canvas"); c.width = src.width + px * 6; c.height = src.height + px * 6; var g = c.getContext("2d"); g.filter = "blur(" + px + "px)"; g.drawImage(src, px * 3, px * 3); return c; }
+
+    var kinds = [];
+    for (var n = 0; n < 6; n++) { var f = makePetal(false), b = makePetal(true); kinds.push({ f: [blurred(f, 2.4), f, blurred(f, 3.4)], b: [blurred(b, 2.4), b, blurred(b, 3.4)] }); }
+
+    var petals = [];
+    function spawn(p, anywhere) {
+      p.z = Math.random(); p.layer = p.z < .3 ? 0 : p.z > .88 ? 2 : 1;
+      p.size = p.layer === 0 ? rnd(14, 22) : p.layer === 2 ? rnd(46, 64) : rnd(24, 36);
+      p.x = rnd(-40, W + 40); p.y = anywhere ? rnd(-H * .1, H) : rnd(-140, -40);
+      p.vy = (p.layer === 0 ? rnd(18, 30) : p.layer === 2 ? rnd(60, 90) : rnd(32, 55));
+      p.sw = rnd(18, 55) * (p.layer + 1) * .6; p.sf = rnd(.4, 1.1); p.ph = rnd(0, 6.28);
+      p.rot = rnd(0, 6.28); p.vr = rnd(-1, 1); p.fl = rnd(0, 6.28); p.vf = rnd(.8, 2.4) * (Math.random() < .5 ? -1 : 1);
+      p.k = kinds[(Math.random() * kinds.length) | 0];
+      p.alpha = p.layer === 0 ? .7 : 1;
+    }
+    function resize() { W = window.innerWidth; H = window.innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    window.addEventListener("resize", resize); resize();
+    var count = W < 700 ? 22 : 40;
+    for (var i = 0; i < count; i++) { var p = {}; spawn(p, true); petals.push(p); }
+    petals.sort(function (a, b) { return a.z - b.z; });
+
+    var last = performance.now(), t = 0;
+    function frame(now) {
+      var dt = Math.min((now - last) / 1000, .05); last = now; t += dt;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < petals.length; i++) {
+        var p = petals[i];
+        p.fl += p.vf * dt; p.rot += p.vr * dt;
+        var flat = Math.abs(Math.cos(p.fl));
+        p.y += p.vy * (.55 + .45 * flat) * dt;               /* a petal lying flat falls slower */
+        var x = p.x + Math.sin(t * p.sf + p.ph) * p.sw;
+        if (p.y > H + 80) spawn(p, false);
+        var sx = Math.cos(p.fl), img = sx >= 0 ? p.k.f[p.layer] : p.k.b[p.layer];
+        var s = p.size / 120;
+        ctx.save();
+        ctx.globalAlpha = p.alpha * (.75 + .25 * flat);
+        ctx.translate(x, p.y); ctx.rotate(p.rot);
+        ctx.scale(Math.max(.12, Math.abs(sx)) * s, (.85 + .15 * Math.sin(p.fl * .7)) * s);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        ctx.restore();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  /* ---------------- 3. The red string of fate ---------------- */
+  /* One fine silk thread tied in a small knot at each end, joining her card to the mirror.
+     It never breaks: it sways, stretches with the window, and draws itself in once. */
+  (function () {
+    var base = document.getElementById("ftBase"), twist = document.getElementById("ftTwist"), shine = document.getElementById("ftShine");
+    var kA = document.getElementById("ftKnotA"), kB = document.getElementById("ftKnotB");
+    var card = document.querySelector(".card-footer") || document.querySelector(".login-card");
+    if (!base || !card || !stage) return;
+    function knot(g) {
+      g.innerHTML = '<ellipse rx="6.5" ry="3.6" fill="none" stroke="#a8001a" stroke-width="2.2"/>' +
+        '<ellipse rx="6.5" ry="3.6" fill="none" stroke="#ff7b8c" stroke-width=".6" stroke-dasharray="1.4 2.4"/>' +
+        '<path d="M5 1 q6 4 9 11" fill="none" stroke="#a8001a" stroke-width="1.8" stroke-linecap="round"/>' +
+        '<path d="M4 2 q2 6 0 12" fill="none" stroke="#a8001a" stroke-width="1.6" stroke-linecap="round"/>' +
+        '<circle r="2.4" fill="#8a0015"/>';
+    }
+    knot(kA); knot(kB);
+    function ends() {
+      var c = (document.querySelector(".login-card") || card).getBoundingClientRect(), m = (stage.querySelector(".mirror-real") || stage).getBoundingClientRect();
+      var stacked = c.top > m.bottom - 10; /* phone layout: card sits below the mirror */
+      var a = stacked ? { x: c.left + c.width * .5, y: c.top + 14 } : { x: c.left + c.width * .5, y: c.bottom - 16 };
+      var b = { x: m.left + m.width * .5, y: m.top + m.height * .72 };
+      return [a, b, stacked];
+    }
+    var t0 = performance.now(), drawn = false;
+    function frame(now) {
+      var t = (now - t0) / 1000, e = ends(), a = e[0], b = e[1];
+      var dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      var sag = Math.min(160, dist * .32), sway = reduce ? 0 : Math.sin(t * .9) * 10, sway2 = reduce ? 0 : Math.cos(t * .7) * 8;
+      var c1, c2;
+      if (e[2]) { /* hang loose to the side instead of crossing the card */
+        var side = Math.min(window.innerWidth * .32, 120);
+        c1 = { x: a.x - side + sway, y: a.y - Math.abs(dy) * .25 + sway2 };
+        c2 = { x: b.x - side * .8 - sway, y: b.y + Math.abs(dy) * .35 - sway2 };
+      } else {
+        c1 = { x: a.x + dx * .28 + sway2, y: Math.max(a.y, b.y) + sag + sway };
+        c2 = { x: a.x + dx * .72 - sway2, y: Math.max(a.y, b.y) + sag * .8 - sway };
+      }
+      var d = "M" + a.x.toFixed(1) + " " + a.y.toFixed(1) + " C" + c1.x.toFixed(1) + " " + c1.y.toFixed(1) + " " + c2.x.toFixed(1) + " " + c2.y.toFixed(1) + " " + b.x.toFixed(1) + " " + b.y.toFixed(1);
+      base.setAttribute("d", d); twist.setAttribute("d", d); shine.setAttribute("d", d);
+      shine.setAttribute("transform", "translate(0 -0.7)");
+      kA.setAttribute("transform", "translate(" + a.x.toFixed(1) + " " + a.y.toFixed(1) + ") rotate(-18)");
+      kB.setAttribute("transform", "translate(" + b.x.toFixed(1) + " " + b.y.toFixed(1) + ") rotate(16)");
+      var k = reduce ? 1 : Math.min(1, Math.max(0, (t - .8) / 3.4)), eased = 1 - Math.pow(1 - k, 3);
+      base.setAttribute("stroke-dashoffset", (1 - eased).toFixed(4));
+      kA.setAttribute("opacity", Math.min(1, t * 1.5).toFixed(2));
+      if (k >= 1 && !drawn) { drawn = true; }
+      var after = Math.min(1, Math.max(0, (t - 4.2) / 1));
+      twist.setAttribute("opacity", (after * .75).toFixed(2)); shine.setAttribute("opacity", (after * .45).toFixed(2)); kB.setAttribute("opacity", after.toFixed(2));
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+})();
+</script>
+<!-- ===== END THEME ===== -->
