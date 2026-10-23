@@ -1,411 +1,518 @@
 
-export const DIMPOO_LOGIN_PAGE = `<!DOCTYPE html>
+const DIMPOO_LOGIN_PAGE = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>For Dimpoo ♡</title>
+<meta name="theme-color" content="#160d1d">
+<title>You Are My Mirror</title>
 
 <style>
+:root {
+  --pink: #f49ab9;
+  --rose: #ffb7cb;
+  --cream: #fff3f6;
+  --muted: #d5c0d2;
+  --night: #160d1d;
+}
+
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 15% 25%, rgba(112,30,65,.24), transparent 45%),
-    linear-gradient(135deg, #090909, #171014 55%, #090909);
-  color: #f7edf0;
+  color: var(--cream);
   font-family: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(ellipse at 12% 20%, #49213d, transparent 42%),
+    radial-gradient(ellipse at 90% 80%, #29204d, transparent 45%),
+    var(--night);
+  overflow-x: hidden;
+}
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  color: #ffd3e0;
+  opacity: .5;
+  animation: twinkle 3s ease-in-out infinite alternate;
+}
+
+.star:nth-child(1) { top: 12%; left: 8%; }
+.star:nth-child(2) { top: 22%; left: 48%; animation-delay: 1s; }
+.star:nth-child(3) { top: 70%; left: 12%; animation-delay: .6s; }
+.star:nth-child(4) { top: 16%; right: 8%; animation-delay: 1.4s; }
+.star:nth-child(5) { top: 83%; right: 17%; animation-delay: .3s; }
+
+@keyframes twinkle {
+  from { opacity: .2; transform: scale(.8); }
+  to { opacity: .9; transform: scale(1.3); }
 }
 
 .page {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
+  width: min(1240px, 100%);
+  margin: auto;
+  padding: 32px;
   display: grid;
-  grid-template-columns: minmax(0,1fr) 360px;
-  gap: 36px;
-  padding: 36px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .75fr);
+  gap: 38px;
   align-items: center;
 }
 
-.lyrics-stage {
+/* Left side: only the song title and its lyrics */
+.story {
+  position: relative;
   min-width: 0;
-  min-height: 70vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lyrics-inner {
-  width: 100%;
-  max-width: 800px;
-  text-align: center;
-}
-
-/* Hide the title and lyrics together until 13 seconds */
-.lyrics-content {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-
-.lyrics-content.revealed {
-  visibility: visible;
-  opacity: 1;
-}
-
-.lyrics-heading {
-  color: #c9a1ac;
-  font-size: 12px;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  margin-bottom: 28px;
-}
-
-.lyrics-scroll {
-  visibility: hidden;
-  opacity: 0;
-  min-height: 230px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-  transition: opacity .8s ease;
-}
-
-.lyrics-scroll.started {
-  visibility: visible;
-  opacity: 1;
-}
-
-.lyric-line {
-  margin: 0;
-  color: rgba(255,240,245,.35);
-  font-size: clamp(20px,3vw,36px);
-  line-height: 1.4;
-  transition: color .4s ease, transform .4s ease;
-}
-
-.lyric-line.active {
-  color: #fff5f7;
-  transform: scale(1.035);
-  text-shadow: 0 0 24px rgba(255,150,185,.3);
-}
-
-.lyric-line.past {
-  color: rgba(255,220,232,.55);
-}
-
-.login-area {
-  width: 100%;
-  max-width: 360px;
-  justify-self: end;
-}
-
-.login-card {
-  border: 1px solid rgba(255,208,222,.2);
+  min-height: 650px;
+  overflow: hidden;
+  border: 1px solid rgba(255,183,203,.18);
   border-radius: 24px;
-  padding: 30px;
-  background: rgba(20,15,18,.88);
-  box-shadow: 0 20px 70px rgba(0,0,0,.45);
-  backdrop-filter: blur(14px);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,8,22,.04) 10%,
+      rgba(17,8,22,.12) 45%,
+      rgba(17,8,22,.88) 100%
+    ),
+    url("/mirror-red-thread.png") center center / cover no-repeat,
+    linear-gradient(145deg, #49213d, #171023);
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 1.2s ease, transform 1.2s ease, visibility 1.2s;
 }
 
-.heart {
-  font-size: 30px;
+.story.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.story-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 30px 24px 35px;
   text-align: center;
-  margin-bottom: 10px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(17,8,22,.84) 25%,
+    rgba(17,8,22,.94)
+  );
 }
 
 h1 {
-  text-align: center;
+  margin: 0;
+  font-size: clamp(40px, 5vw, 67px);
+  line-height: 1.08;
   font-weight: normal;
-  font-size: 30px;
-  margin: 0 0 8px;
+  letter-spacing: -1px;
+  color: var(--rose);
+  text-shadow: 0 0 25px rgba(255,145,183,.25);
 }
 
-.subtitle {
+h1 span {
+  font-style: italic;
+}
+
+.thread-divider {
+  width: 145px;
+  height: 2px;
+  position: relative;
+  margin: 24px auto 18px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #ff416d,
+    #ff8bab,
+    transparent
+  );
+  box-shadow: 0 0 12px rgba(255,65,109,.55);
+}
+
+.thread-divider::after {
+  content: "♡";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #211125;
+  color: #ff8bab;
+  padding: 0 10px;
+  font-size: 23px;
+}
+
+.lyrics-area {
+  min-height: 65px;
+  color: #ffe5ed;
+  font-size: clamp(16px, 2vw, 21px);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.lyric-line {
+  animation: lyricFade 1.1s ease both;
+}
+
+@keyframes lyricFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Right side: existing login wording */
+.login-card {
+  width: 100%;
+  max-width: 410px;
+  justify-self: center;
+  padding: 36px clamp(22px, 4vw, 34px);
+  border: 1px solid rgba(255,183,203,.38);
+  border-radius: 24px;
+  background: linear-gradient(
+    145deg,
+    rgba(65,35,57,.92),
+    rgba(26,17,35,.96)
+  );
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.35),
+    inset 0 1px rgba(255,255,255,.06);
+  backdrop-filter: blur(18px);
+}
+
+.card-heart {
   text-align: center;
-  color: #c9a1ac;
-  font-size: 14px;
+  color: var(--rose);
+  font-size: 32px;
+  margin-bottom: 18px;
+}
+
+.card-intro {
   margin: 0 0 26px;
+  color: var(--muted);
+  font: 13px/1.8 Arial, sans-serif;
+  text-align: center;
 }
 
 label {
   display: block;
-  color: #e8cbd4;
-  font-size: 13px;
-  margin: 16px 0 8px;
+  color: #f1dce8;
+  font: 12px Arial, sans-serif;
+  margin: 18px 0 9px;
 }
 
 input {
   display: block;
   width: 100%;
-  padding: 13px 14px;
-  border: 1px solid #57414a;
-  border-radius: 10px;
-  background: #100d0f;
-  color: white;
-  font: inherit;
+  min-height: 49px;
+  padding: 13px 15px;
+  border-radius: 11px;
+  border: 1px solid rgba(255,183,203,.3);
   outline: none;
+  color: white;
+  background: rgba(255,255,255,.045);
+  font: 14px Arial, sans-serif;
 }
 
+input::placeholder { color: #b8a4b5; }
+
 input:focus {
-  border-color: #d68da5;
-  box-shadow: 0 0 0 3px rgba(214,141,165,.12);
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(244,154,185,.12);
 }
 
 button {
   width: 100%;
-  border: 0;
-  border-radius: 10px;
-  padding: 13px 16px;
-  margin-top: 22px;
-  background: #d9a0b2;
-  color: #1b1014;
-  font-size: 15px;
-  font-weight: bold;
+  min-height: 50px;
+  border: none;
+  border-radius: 11px;
+  margin-top: 25px;
+  background: linear-gradient(110deg, #ffb5ca, #f18aab);
+  color: #341726;
+  font: bold 14px Arial, sans-serif;
   cursor: pointer;
+  box-shadow: 0 7px 25px rgba(241,138,171,.15);
+  transition: transform .2s, filter .2s;
 }
 
-button:hover { background: #edb7c8; }
-button:disabled { opacity: .65; cursor: wait; }
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
 
-.error {
-  display: none;
-  color: #ff9caa;
-  text-align: center;
-  font: 13px/1.5 Arial,sans-serif;
+button:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.message {
+  min-height: 20px;
   margin-top: 14px;
-}
-
-.love-note {
+  color: #ffb1c7;
+  font: 12px/1.5 Arial, sans-serif;
   text-align: center;
-  margin-top: 24px;
-  color: #d7b5c0;
-  line-height: 1.7;
-  font-size: 15px;
+  overflow-wrap: anywhere;
 }
 
-.signature {
-  display: block;
-  color: #f0c8d5;
+.card-footer {
+  margin-top: 26px;
+  text-align: center;
+  color: var(--rose);
+  font-size: clamp(19px, 2.3vw, 25px);
+  line-height: 1.5;
   font-style: italic;
-  margin-top: 8px;
 }
 
-.music-status {
-  color: #a88a95;
-  text-align: center;
-  font: 11px/1.5 Arial,sans-serif;
-  margin-top: 16px;
+.audio-hint {
+  position: fixed;
+  z-index: 5;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: calc(100% - 28px);
+  min-height: auto;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,183,203,.35);
+  border-radius: 30px;
+  background: #29182e;
+  color: white;
+  font: 12px Arial, sans-serif;
 }
 
-@media (max-width: 850px) {
+.audio-hint[hidden] { display: none; }
+
+@media (max-width: 820px) {
   .page {
     grid-template-columns: 1fr;
-    padding: 24px 18px 40px;
-    gap: 20px;
+    gap: 24px;
+    padding: 18px 15px 75px;
   }
 
-  .lyrics-stage {
-    min-height: 36vh;
+  .story {
     order: 1;
+    min-height: 510px;
   }
 
-  .login-area {
+  .login-card {
     order: 2;
-    justify-self: center;
-    max-width: 420px;
+    max-width: 460px;
   }
 
-  .lyric-line {
-    font-size: clamp(19px,5vw,29px);
-  }
+  h1 { font-size: clamp(39px, 9vw, 58px); }
 }
 
 @media (max-width: 420px) {
-  .login-card { padding: 24px 20px; }
-  .lyrics-heading { letter-spacing: 3px; }
+  .story { min-height: 440px; }
+  .story-copy { padding: 24px 15px 28px; }
+  .login-card { padding: 29px 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
 }
 </style>
 </head>
 
 <body>
-<audio id="song" src="/vimlesh.mp3" preload="auto" autoplay loop playsinline></audio>
+<div class="ambient" aria-hidden="true">
+  <span class="star">✦</span>
+  <span class="star">✧</span>
+  <span class="star">✦</span>
+  <span class="star">✧</span>
+  <span class="star">✦</span>
+</div>
+
+<audio id="song" src="/vimlesh.mp3" preload="auto" loop playsinline></audio>
 
 <main class="page">
-  <section class="lyrics-stage">
-    <div class="lyrics-inner">
-      <div id="lyricsContent" class="lyrics-content">
-        <div class="lyrics-heading">You Are My Mirror ♡</div>
-        <div id="lyricsScroll" class="lyrics-scroll"></div>
-      </div>
+
+  <section class="story" id="story">
+    <div class="story-copy">
+      <h1>You Are<br><span>My Mirror</span></h1>
+      <div class="thread-divider"></div>
+      <div class="lyrics-area" id="lyrics" aria-live="polite"></div>
     </div>
   </section>
 
-  <section class="login-area">
-    <div class="login-card">
-      <div class="heart">♡</div>
-      <h1>Hi, Dimpoo</h1>
-      <p class="subtitle">A little place made just for you</p>
+  <section class="login-card">
+    <div class="card-heart">♡</div>
 
-      <form id="loginForm">
-        <label for="username">Your username</label>
-        <input id="username" name="username" type="text"
-          placeholder="Enter your username"
-          autocomplete="username" required>
+    <p class="card-intro">
+      A little space made with love.<br>
+      Sign in to continue.
+    </p>
 
-        <label for="password">Your password</label>
-        <input id="password" name="password" type="password"
-          placeholder="Enter your password"
-          autocomplete="current-password" required>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        type="text"
+        autocomplete="username"
+        placeholder="Enter your username"
+        required
+      >
 
-        <button id="loginButton" type="submit">Open our little world ♡</button>
-        <p id="error" class="error" role="alert"></p>
-      </form>
-    </div>
+      <label for="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+        required
+      >
 
-    <div class="love-note">
-      Some things are hard to put into words,
-      so I made you a little place instead.
-      <span class="signature">Made with love, just for you ♡</span>
-    </div>
+      <button id="loginButton" type="submit">Enter with love ♡</button>
+      <div class="message" id="message" role="status"></div>
+    </form>
 
-    <div id="musicStatus" class="music-status">You Are My Mirror ♡</div>
+    <div class="card-footer">Dimpoo,<br>you are loved always ♡</div>
   </section>
+
 </main>
+
+<button class="audio-hint" id="audioHint" type="button" hidden>
+  ♫ Tap to start our song
+</button>
 
 <script>
 (function () {
-  const song = document.getElementById("song");
-  const lyricsContent = document.getElementById("lyricsContent");
-  const lyricsScroll = document.getElementById("lyricsScroll");
-  const musicStatus = document.getElementById("musicStatus");
-  const form = document.getElementById("loginForm");
-  const loginButton = document.getElementById("loginButton");
-  const error = document.getElementById("error");
+  "use strict";
 
-  // Reveal the title and lyrics section after 13 seconds of playback.
-  const CONTENT_START_AT = 13;
+  var CONTENT_START_AT = 13;
+  var LYRICS_START_AT = 14 * 60 + 30;
 
-  // Begin the lyrics at 14 minutes and 30 seconds of playback.
-  const LYRICS_START_AT = 14 * 60 + 30;
+  var song = document.getElementById("song");
+  var story = document.getElementById("story");
+  var lyricsBox = document.getElementById("lyrics");
+  var audioHint = document.getElementById("audioHint");
+  var loginForm = document.getElementById("loginForm");
+  var loginButton = document.getElementById("loginButton");
+  var message = document.getElementById("message");
 
-  let lyricLines = [];
+  var lyricLines = [];
+  var shownLines = 0;
 
-  // Never seek or reset the song. Let it play naturally from 0:00.
-  function tryPlaySong() {
-    if (!song.paused) return;
-
-    song.play().then(function () {
-      musicStatus.textContent = "Playing You Are My Mirror ♡";
-    }).catch(function () {
-      musicStatus.textContent = "Tap anywhere to play our song ♡";
-    });
-  }
-
-  song.addEventListener("playing", function () {
-    musicStatus.textContent = "Playing You Are My Mirror ♡";
-    updateDisplay();
-  });
-
-  document.addEventListener("pointerdown", tryPlaySong, { once: true });
-  document.addEventListener("keydown", tryPlaySong, { once: true });
-
-  tryPlaySong();
-
-  fetch("/lyrics.txt", { cache: "no-cache" })
-    .then(function (response) {
-      if (!response.ok) throw new Error("Could not load lyrics");
-      return response.text();
-    })
-    .then(function (text) {
-      lyricLines = text
-        .split(/\\r?\\n/)
-        .map(function (line) { return line.trim(); })
-        .filter(function (line) { return line.length > 0; });
-
-      lyricsScroll.innerHTML = "";
-
-      lyricLines.forEach(function (line, index) {
-        const paragraph = document.createElement("p");
-        paragraph.className = "lyric-line";
-        paragraph.textContent = line;
-        paragraph.dataset.index = String(index);
-        lyricsScroll.appendChild(paragraph);
-      });
-
-      updateDisplay();
-    })
-    .catch(function () {
-      lyricsScroll.innerHTML =
-        '<p class="lyric-line">You Are My Mirror ♡</p>';
-    });
-
-  function updateDisplay() {
-    const currentTime = song.currentTime;
-
-    // Hide the title and entire left section until 13 seconds.
-    if (currentTime >= CONTENT_START_AT) {
-      lyricsContent.classList.add("revealed");
-    } else {
-      lyricsContent.classList.remove("revealed");
+  function updatePage() {
+    if (song.currentTime >= CONTENT_START_AT) {
+      story.classList.add("visible");
     }
 
-    // Lyrics themselves remain hidden until 14:30.
-    if (currentTime < LYRICS_START_AT) {
-      lyricsScroll.classList.remove("started");
+    if (song.currentTime < LYRICS_START_AT || !lyricLines.length) {
       return;
     }
 
-    lyricsScroll.classList.add("started");
+    var duration = song.duration;
 
-    const elements = lyricsScroll.querySelectorAll(".lyric-line");
-    if (!elements.length) return;
+    if (!Number.isFinite(duration) || duration <= LYRICS_START_AT) {
+      return;
+    }
 
-    const duration = Number.isFinite(song.duration)
-      ? song.duration
-      : LYRICS_START_AT + 1;
+    var elapsed = song.currentTime - LYRICS_START_AT;
+    var remainingDuration = duration - LYRICS_START_AT;
 
-    const lyricDuration = Math.max(1, duration - LYRICS_START_AT);
-    const progress = Math.min(
-      0.9999,
-      Math.max(0, (currentTime - LYRICS_START_AT) / lyricDuration)
+    var target = Math.min(
+      lyricLines.length,
+      Math.floor((elapsed / remainingDuration) * lyricLines.length) + 1
     );
 
-    const activeIndex = Math.min(
-      elements.length - 1,
-      Math.floor(progress * elements.length)
-    );
-
-    elements.forEach(function (element, index) {
-      element.classList.toggle("active", index === activeIndex);
-      element.classList.toggle("past", index < activeIndex);
-    });
+    while (shownLines < target) {
+      var line = document.createElement("div");
+      line.className = "lyric-line";
+      line.textContent = lyricLines[shownLines];
+      lyricsBox.appendChild(line);
+      shownLines++;
+    }
   }
 
-  song.addEventListener("timeupdate", updateDisplay);
-  song.addEventListener("seeked", updateDisplay);
-  song.addEventListener("durationchange", updateDisplay);
+  async function loadLyrics() {
+    try {
+      var response = await fetch("/lyrics.txt", { cache: "no-cache" });
+      if (!response.ok) throw new Error("Could not load lyrics.txt");
 
-  // Login
-  form.addEventListener("submit", async function (event) {
+      var content = await response.text();
+
+      lyricLines = content
+        .split(/\\r?\\n/)
+        .map(function (line) { return line.trim(); })
+        .filter(Boolean);
+
+      updatePage();
+    } catch (error) {
+      console.warn("Could not load lyrics:", error);
+    }
+  }
+
+  async function startMusic() {
+    try {
+      await song.play();
+      audioHint.hidden = true;
+      updatePage();
+    } catch (error) {
+      audioHint.hidden = false;
+    }
+  }
+
+  song.addEventListener("timeupdate", updatePage);
+  song.addEventListener("loadedmetadata", updatePage);
+
+  song.addEventListener("playing", function () {
+    audioHint.hidden = true;
+    updatePage();
+  });
+
+  song.addEventListener("error", function () {
+    audioHint.textContent =
+      "Song could not load. Check that vimlesh.mp3 is in the root folder.";
+    audioHint.hidden = false;
+  });
+
+  audioHint.addEventListener("click", startMusic);
+
+  document.addEventListener("pointerdown", function () {
+    if (song.paused) startMusic();
+  }, { once: true });
+
+  document.addEventListener("keydown", function () {
+    if (song.paused) startMusic();
+  }, { once: true });
+
+  loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    error.style.display = "none";
-    error.textContent = "";
+    message.textContent = "";
     loginButton.disabled = true;
-    loginButton.textContent = "Opening...";
+    loginButton.textContent = "Please wait…";
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+    var username = document.getElementById("username").value.trim();
+    var password = document.getElementById("password").value;
 
     try {
-      const response = await fetch("/__login", {
+      var response = await fetch("/__login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
         body: JSON.stringify({
           username: username,
           password: password
@@ -417,24 +524,34 @@ button:disabled { opacity: .65; cursor: wait; }
         return;
       }
 
-      let message = "Incorrect username or password. Try again ♡";
+      var errorMessage = "Incorrect username or password. Please try again.";
 
       try {
-        const result = await response.json();
-        if (result && result.error) message = result.error;
+        var result = await response.json();
+
+        if (result && result.error) {
+          errorMessage = result.error;
+        } else if (result && result.message) {
+          errorMessage = result.message;
+        }
       } catch (_) {}
 
-      error.textContent = message;
-      error.style.display = "block";
-    } catch (_) {
-      error.textContent = "Something went wrong. Please try again.";
-      error.style.display = "block";
+      message.textContent = errorMessage;
+    } catch (error) {
+      message.textContent = "Connection issue. Please try again.";
     } finally {
       loginButton.disabled = false;
-      loginButton.textContent = "Open our little world ♡";
+      loginButton.textContent = "Enter with love ♡";
     }
   });
+
+  loadLyrics();
+
+  // Start the song at 0:00; never seek forward.
+  startMusic();
 })();
 </script>
 </body>
 </html>`;
+
+export { DIMPOO_LOGIN_PAGE };
