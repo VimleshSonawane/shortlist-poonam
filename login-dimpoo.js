@@ -121,7 +121,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 0;
+  min-height: 400px;
   margin: 4px 0 10px;
 }
 
@@ -132,6 +132,16 @@ body {
   max-height: 440px;
   overflow: visible;
 }
+
+#mirrorCanvas {
+  position: absolute;
+  inset: -10px -24px;
+  width: calc(100% + 48px);
+  height: calc(100% + 20px);
+  pointer-events: none;
+}
+
+.mirror-stage.has-3d .mirror { visibility: hidden; }
 
 .mirror-glass-sheen {
   animation: sheen 7s ease-in-out infinite;
@@ -426,6 +436,36 @@ input:focus {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// A small warm "room" that real-gold and petal surfaces reflect, like the
+// candle-lit room in a photo. Built once per WebGL renderer.
+window.__makeRoseEnv = function (renderer) {
+  if (!window.THREE) return null;
+  var pm = new THREE.PMREMGenerator(renderer);
+  var es = new THREE.Scene();
+  es.add(new THREE.Mesh(
+    new THREE.BoxGeometry(24, 14, 24),
+    new THREE.MeshBasicMaterial({ color: 0x2b0d16, side: THREE.BackSide })
+  ));
+  function panel(w, h, color, power, x, y, z) {
+    var m = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+    m.color.multiplyScalar(power);
+    var p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
+    p.position.set(x, y, z);
+    p.lookAt(0, 0, 0);
+    es.add(p);
+  }
+  panel(6, 4, 0xfff0d6, 7, -5, 4, 7);    // big warm window, upper left
+  panel(2.5, 7, 0xffd2a0, 3.5, 7, 0.5, 3); // lamp glow, right
+  panel(5, 3, 0xfff6ea, 4, 2, 6, -7);    // ceiling light behind
+  panel(9, 2, 0xff5c7c, 1.4, 0, -6, -3); // rose-red bounce from below
+  panel(1.5, 1.5, 0xffffff, 10, -1, 2, 9); // small sparkle source
+  var tex = pm.fromScene(es, 0.02).texture;
+  pm.dispose();
+  return tex;
+};
+</script>
+
+<script>
 (function () {
   "use strict";
   if (!window.THREE) return;
@@ -455,6 +495,8 @@ input:focus {
   var rim = new THREE.DirectionalLight(0xff5a78, 0.9);
   rim.position.set(-5, -3, -6);
   scene.add(rim);
+
+  var envTex = window.__makeRoseEnv ? window.__makeRoseEnv(renderer) : null;
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
 
@@ -525,9 +567,9 @@ input:focus {
 
   // --- Petal geometry: cupped across, curled back at the tip, rippled edge ---
   function makeGeometry() {
-    var geo = new THREE.PlaneGeometry(1, 1.25, 28, 28);
+    var geo = new THREE.PlaneGeometry(1, 1.25, 32, 32);
     var pos = geo.attributes.position;
-    var cup = rnd(0.25, 0.55);
+    var cup = rnd(0.35, 0.7);
     var curl = rnd(-0.45, -0.15);
     var ripple = rnd(0.03, 0.08);
     var freq = rnd(8, 14);
@@ -551,15 +593,17 @@ input:focus {
       map: makeTexture(),
       side: THREE.DoubleSide,
       alphaTest: 0.5,
-      roughness: 0.42,
+      roughness: 0.36,
       metalness: 0,
+      envMap: envTex,
+      envMapIntensity: 0.6,
       emissive: 0x3a0006,
       emissiveIntensity: 0.4
     }));
   }
   for (var n = 0; n < 6; n++) geometries.push(makeGeometry());
 
-  var count = window.innerWidth < 700 ? 22 : 44;
+  var count = window.innerWidth < 700 ? 40 : 80;
   var petals = [];
   var aspect = 1;
 
@@ -590,7 +634,7 @@ input:focus {
       geometries[i % geometries.length],
       materials[i % materials.length]
     );
-    var s = rnd(0.45, 0.85);
+    var s = rnd(0.15, 0.28);
     mesh.scale.set(s, s, s);
     mesh.rotation.set(rnd(0, 6), rnd(0, 6), rnd(0, 6));
     scene.add(mesh);
@@ -665,7 +709,8 @@ input:focus {
       </svg>
     </div>
 
-    <div class="mirror-stage">
+    <div class="mirror-stage" id="mirrorStage">
+      <canvas id="mirrorCanvas" aria-hidden="true"></canvas>
       <svg class="mirror" viewBox="0 0 500 440" role="img" aria-label="An antique gothic mirror on a stand, tied with red thread">
         <defs>
           <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
@@ -826,6 +871,409 @@ input:focus {
   </section>
 
 </main>
+
+<script>
+(function () {
+  "use strict";
+  if (!window.THREE) return;
+
+  var stage = document.getElementById("mirrorStage");
+  var canvas = document.getElementById("mirrorCanvas");
+  if (!stage || !canvas) return;
+
+  var renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  } catch (e) { return; }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+
+  var env = window.__makeRoseEnv(renderer);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+
+  scene.add(new THREE.AmbientLight(0xffe6d0, 0.18));
+  var key = new THREE.DirectionalLight(0xfff0dc, 1.4);
+  key.position.set(4, 5, 7);
+  scene.add(key);
+  var rimLight = new THREE.DirectionalLight(0xff7a90, 0.6);
+  rimLight.position.set(-5, 1, -4);
+  scene.add(rimLight);
+  var glint = new THREE.PointLight(0xfff2d8, 1.2, 12);
+  scene.add(glint);
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  // --- Carved relief: a tileable texture of curls, rosettes and beading,
+  //     used as a bump map so the gold looks hand-carved ---
+  function carvingTexture() {
+    var S = 512;
+    var c = document.createElement("canvas");
+    c.width = c.height = S;
+    var g = c.getContext("2d");
+    g.fillStyle = "#808080";
+    g.fillRect(0, 0, S, S);
+    function wrap(fn) {
+      for (var ox = -S; ox <= S; ox += S)
+        for (var oy = -S; oy <= S; oy += S) fn(ox, oy);
+    }
+    for (var i = 0; i < 90; i++) {
+      var cx = rnd(0, S), cy = rnd(0, S), r = rnd(10, 34), turns = rnd(1.2, 2.4);
+      var light = Math.random() < 0.6;
+      wrap(function (ox, oy) {
+        g.beginPath();
+        for (var a = 0; a < Math.PI * 2 * turns; a += 0.12) {
+          var rr = r * (1 - a / (Math.PI * 2 * turns) * 0.85);
+          var x = cx + ox + Math.cos(a) * rr, y = cy + oy + Math.sin(a) * rr;
+          if (a === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.strokeStyle = light ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.45)";
+        g.lineWidth = rnd(2.5, 6);
+        g.stroke();
+      });
+    }
+    for (var k = 0; k < 40; k++) {
+      var px = rnd(0, S), py = rnd(0, S), pr = rnd(6, 13);
+      wrap(function (ox, oy) {
+        for (var p = 0; p < 8; p++) {
+          var ang = p / 8 * Math.PI * 2;
+          var grd = g.createRadialGradient(
+            px + ox + Math.cos(ang) * pr, py + oy + Math.sin(ang) * pr, 0,
+            px + ox + Math.cos(ang) * pr, py + oy + Math.sin(ang) * pr, pr * 0.7);
+          grd.addColorStop(0, "rgba(255,255,255,.7)");
+          grd.addColorStop(1, "rgba(255,255,255,0)");
+          g.fillStyle = grd;
+          g.fillRect(0, 0, S, S);
+        }
+      });
+    }
+    for (var n = 0; n < 9000; n++) {
+      g.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.1)";
+      g.fillRect(rnd(0, S), rnd(0, S), 2, 2);
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(1.6, 1.6);
+    return t;
+  }
+  var carve = carvingTexture();
+
+  var goldDeep = new THREE.MeshStandardMaterial({
+    color: 0xb8862c, metalness: 1, roughness: 0.38,
+    envMap: env, envMapIntensity: 1.25, bumpMap: carve, bumpScale: 0.035
+  });
+  var goldBright = new THREE.MeshStandardMaterial({
+    color: 0xe2b85c, metalness: 1, roughness: 0.24,
+    envMap: env, envMapIntensity: 1.4, bumpMap: carve, bumpScale: 0.012
+  });
+  var goldOrn = new THREE.MeshStandardMaterial({
+    color: 0xd9ac4c, metalness: 1, roughness: 0.3,
+    envMap: env, envMapIntensity: 1.35
+  });
+  var glassMat = new THREE.MeshStandardMaterial({
+    color: 0xd9cfcb, metalness: 1, roughness: 0.05,
+    envMap: env, envMapIntensity: 0.9
+  });
+
+  // --- Frame outline, shaped like an antique gilded floor mirror ---
+  function outerShape() {
+    var s = new THREE.Shape();
+    s.moveTo(0, -2.14);
+    s.bezierCurveTo(0.45, -2.14, 0.93, -2.06, 0.93, -1.7);
+    s.lineTo(0.89, 1.2);
+    s.bezierCurveTo(0.9, 1.56, 0.7, 1.72, 0.48, 1.86);
+    s.bezierCurveTo(0.3, 1.97, 0.12, 2.02, 0, 2.26);
+    s.bezierCurveTo(-0.12, 2.02, -0.3, 1.97, -0.48, 1.86);
+    s.bezierCurveTo(-0.7, 1.72, -0.9, 1.56, -0.89, 1.2);
+    s.lineTo(-0.93, -1.7);
+    s.bezierCurveTo(-0.93, -2.06, -0.45, -2.14, 0, -2.14);
+    return s;
+  }
+
+  function arch(hw, bottom, sideTop, peak) {
+    var s = new THREE.Shape();
+    var r = 0.08;
+    s.moveTo(-hw + r, bottom);
+    s.lineTo(hw - r, bottom);
+    s.quadraticCurveTo(hw, bottom, hw, bottom + r);
+    s.lineTo(hw, sideTop);
+    s.bezierCurveTo(hw, sideTop + (peak - sideTop) * 0.65, hw * 0.55, peak, 0, peak);
+    s.bezierCurveTo(-hw * 0.55, peak, -hw, sideTop + (peak - sideTop) * 0.65, -hw, sideTop);
+    s.lineTo(-hw, bottom + r);
+    s.quadraticCurveTo(-hw, bottom, -hw + r, bottom);
+    return s;
+  }
+
+  function ring(outer, hole, depth, bevel, mat, z) {
+    outer.holes = [hole];
+    var geo = new THREE.ExtrudeGeometry(outer, {
+      depth: depth, curveSegments: 72, bevelEnabled: true,
+      bevelThickness: bevel, bevelSize: bevel * 0.8, bevelSegments: 6
+    });
+    var m = new THREE.Mesh(geo, mat);
+    m.position.z = z;
+    return m;
+  }
+
+  var mirror = new THREE.Group();
+  scene.add(mirror);
+
+  // Body, raised inner molding, and a thin inner lip
+  mirror.add(ring(outerShape(), arch(0.7, -1.86, 1.05, 1.62), 0.1, 0.05, goldDeep, 0));
+  mirror.add(ring(arch(0.73, -1.89, 1.05, 1.66), arch(0.58, -1.74, 1.08, 1.52), 0.16, 0.06, goldBright, 0.02));
+  mirror.add(ring(arch(0.585, -1.745, 1.08, 1.525), arch(0.555, -1.715, 1.08, 1.5), 0.08, 0.012, goldOrn, 0.06));
+
+  // Mirror glass
+  var glass = new THREE.Mesh(new THREE.ShapeGeometry(arch(0.565, -1.725, 1.08, 1.51), 48), glassMat);
+  glass.position.z = 0.07;
+  mirror.add(glass);
+
+  // Beading rows
+  function beads(path, count, radius, z) {
+    var pts = path.getSpacedPoints(count);
+    var inst = new THREE.InstancedMesh(new THREE.SphereGeometry(radius, 12, 10), goldBright, count);
+    var d = new THREE.Object3D();
+    for (var i = 0; i < count; i++) {
+      d.position.set(pts[i].x, pts[i].y, z);
+      d.updateMatrix();
+      inst.setMatrixAt(i, d.matrix);
+    }
+    mirror.add(inst);
+  }
+  beads(arch(0.8, -1.95, 1.05, 1.74), 150, 0.02, 0.16);
+  beads(arch(0.655, -1.815, 1.07, 1.59), 130, 0.014, 0.245);
+
+  // Carved rosette
+  function rosette(r, x, y, z) {
+    var g = new THREE.Group();
+    var petalGeo = new THREE.SphereGeometry(1, 18, 12);
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(r * 0.26, 18, 14), goldBright));
+    for (var ringI = 0; ringI < 2; ringI++) {
+      var n = ringI === 0 ? 7 : 11;
+      var rad = ringI === 0 ? r * 0.42 : r * 0.78;
+      for (var i = 0; i < n; i++) {
+        var a = i / n * Math.PI * 2 + ringI * 0.3;
+        var p = new THREE.Mesh(petalGeo, ringI === 0 ? goldBright : goldOrn);
+        p.scale.set(r * 0.2, r * (ringI === 0 ? 0.3 : 0.36), r * 0.14);
+        p.position.set(Math.cos(a) * rad, Math.sin(a) * rad, ringI === 0 ? r * 0.08 : -r * 0.04);
+        p.rotation.z = a - Math.PI / 2;
+        p.rotation.x = ringI === 0 ? -0.5 : -0.25;
+        g.add(p);
+      }
+    }
+    g.position.set(x, y, z);
+    mirror.add(g);
+    return g;
+  }
+
+  // Scallop shell
+  function shell(scale, x, y, z, flip) {
+    var g = new THREE.Group();
+    var rib = new THREE.SphereGeometry(1, 16, 12);
+    for (var i = 0; i < 11; i++) {
+      var a = -1.25 + i / 10 * 2.5;
+      var m = new THREE.Mesh(rib, i % 2 ? goldOrn : goldBright);
+      m.scale.set(0.045, 0.24, 0.05);
+      m.position.set(Math.sin(a) * 0.2, Math.cos(a) * 0.2, Math.cos(a) * 0.03);
+      m.rotation.z = -a;
+      g.add(m);
+    }
+    var base = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), goldBright);
+    base.scale.set(1.3, 0.8, 0.8);
+    g.add(base);
+    g.scale.setScalar(scale);
+    if (flip) g.rotation.z = Math.PI;
+    g.position.set(x, y, z);
+    mirror.add(g);
+  }
+
+  // C-scroll
+  function scroll(size, x, y, z, dir, rot) {
+    var pts = [];
+    for (var t = 0; t <= 1.0001; t += 0.04) {
+      var a = t * Math.PI * 2.6;
+      var rr = size * (1 - t * 0.78);
+      pts.push(new THREE.Vector3(dir * Math.cos(a) * rr, Math.sin(a) * rr + (1 - t) * size * 0.9, 0));
+    }
+    var tube = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 90, size * 0.11, 12, false),
+      goldOrn
+    );
+    tube.position.set(x, y, z);
+    tube.rotation.z = rot || 0;
+    mirror.add(tube);
+  }
+
+  // Acanthus leaf spray
+  function leaves(x, y, z, dir, count, rot) {
+    var g = new THREE.Group();
+    var geo = new THREE.SphereGeometry(1, 14, 10);
+    for (var i = 0; i < count; i++) {
+      var m = new THREE.Mesh(geo, i % 2 ? goldOrn : goldBright);
+      m.scale.set(0.035, 0.12 - i * 0.006, 0.025);
+      m.position.set(dir * i * 0.035, -i * 0.07, 0);
+      m.rotation.z = dir * (0.5 + i * 0.12);
+      g.add(m);
+    }
+    g.position.set(x, y, z);
+    g.rotation.z = rot || 0;
+    mirror.add(g);
+  }
+
+  // Crest
+  rosette(0.17, 0, 2.0, 0.19);
+  rosette(0.1, 0.34, 1.83, 0.18);
+  rosette(0.1, -0.34, 1.83, 0.18);
+  scroll(0.15, 0.56, 1.58, 0.17, 1, 0.3);
+  scroll(0.15, -0.56, 1.58, 0.17, -1, -0.3);
+  leaves(0.14, 2.12, 0.2, 1, 5, -0.4);
+  leaves(-0.14, 2.12, 0.2, -1, 5, 0.4);
+  shell(0.75, 0, 1.6, 0.27, true);
+
+  // Sides
+  [1, -1].forEach(function (d) {
+    rosette(0.085, d * 0.81, 1.2, 0.17);
+    leaves(d * 0.81, 1.08, 0.18, d, 6, 0);
+    rosette(0.07, d * 0.81, 0.35, 0.17);
+    rosette(0.07, d * 0.81, -0.55, 0.17);
+    rosette(0.09, d * 0.82, -1.25, 0.17);
+    leaves(d * 0.82, -1.08, 0.18, -d, 6, Math.PI);
+    scroll(0.17, d * 0.74, -1.72, 0.17, d, d * 2.6);
+    rosette(0.085, d * 0.44, -1.99, 0.18);
+  });
+
+  // Base
+  shell(1.05, 0, -2.0, 0.2, false);
+
+  mirror.rotation.x = -0.05; // leaning back slightly, like a floor mirror
+
+  // Soft floor shadow
+  (function () {
+    var c = document.createElement("canvas");
+    c.width = 256; c.height = 64;
+    var g = c.getContext("2d");
+    var grd = g.createRadialGradient(128, 32, 4, 128, 32, 128);
+    grd.addColorStop(0, "rgba(0,0,0,.55)");
+    grd.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 256, 64);
+    var m = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.8, 0.7),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })
+    );
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(0, -2.18, 0.1);
+    scene.add(m);
+  })();
+
+  // --- Red threads of fate, wound around the frame and tied in a bow ---
+  var threadMat = new THREE.MeshStandardMaterial({
+    color: 0xc4001c, emissive: 0x8a0012, emissiveIntensity: 0.9, roughness: 0.55, metalness: 0
+  });
+  function v(x, y, z) { return new THREE.Vector3(x, y, z); }
+  var threads = [];
+  function thread(points, radius) {
+    var geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 360, radius, 8, false);
+    geo.setDrawRange(0, 0);
+    var m = new THREE.Mesh(geo, threadMat);
+    m.userData.total = geo.index.count;
+    mirror.add(m);
+    threads.push(m);
+  }
+  thread([
+    v(-2.6, 1.5, 0.6), v(-1.05, 0.95, 0.4), v(-0.4, 0.35, 0.43), v(0, 0.05, 0.45),
+    v(0.45, -0.3, 0.42), v(0.99, -0.68, 0.34), v(1.07, -0.86, 0), v(0.85, -1.0, -0.2),
+    v(-0.85, -1.22, -0.2), v(-1.07, -1.34, 0.05), v(-0.97, -1.46, 0.34),
+    v(-0.3, -1.62, 0.42), v(0.7, -1.7, 0.4), v(2.6, -1.35, 0.6)
+  ], 0.009);
+  thread([
+    v(2.6, 1.85, 0.6), v(1.0, 1.25, 0.4), v(0.35, 0.4, 0.43), v(0, 0.05, 0.45),
+    v(-0.5, -0.25, 0.43), v(-1.0, -0.42, 0.36), v(-1.08, -0.55, 0), v(-0.8, -0.66, -0.2),
+    v(0.8, -0.8, -0.2), v(1.08, -0.9, 0.05), v(2.6, -0.5, 0.55)
+  ], 0.007);
+
+  var bow = new THREE.Group();
+  function loop(d) {
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+      v(0, 0, 0), v(d * 0.08, 0.07, 0.02), v(d * 0.19, 0.08, 0.03),
+      v(d * 0.22, 0.0, 0.02), v(d * 0.17, -0.07, 0.0), v(d * 0.07, -0.04, 0.0), v(0, 0, 0)
+    ], true), 60, 0.011, 8, true);
+  }
+  function tail(d) {
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+      v(0, 0, 0), v(d * 0.04, -0.1, 0.02), v(d * 0.05, -0.2, 0.0), v(d * 0.1, -0.3, 0.03)
+    ]), 40, 0.009, 8, false);
+  }
+  bow.add(new THREE.Mesh(loop(1), threadMat));
+  bow.add(new THREE.Mesh(loop(-1), threadMat));
+  bow.add(new THREE.Mesh(tail(1), threadMat));
+  bow.add(new THREE.Mesh(tail(-1), threadMat));
+  bow.add(new THREE.Mesh(new THREE.SphereGeometry(0.028, 16, 12), threadMat));
+  bow.position.set(0, 0.05, 0.46);
+  bow.scale.setScalar(0.001);
+  mirror.add(bow);
+
+  // --- Sizing ---
+  function resize() {
+    var r = stage.getBoundingClientRect();
+    var w = Math.max(1, r.width), h = Math.max(1, r.height);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    var tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    var dist = Math.max(2.4 / tanHalf, (1.25 / camera.aspect) / tanHalf);
+    camera.position.set(0, 0.05, dist);
+    camera.lookAt(0, 0.02, 0);
+    camera.updateProjectionMatrix();
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  window.addEventListener("resize", resize);
+  resize();
+
+  // Gentle tilt toward the pointer so the gold catches the light
+  var tx = 0, ty = 0;
+  window.addEventListener("pointermove", function (e) {
+    tx = (e.clientX / window.innerWidth - 0.5) * 0.5;
+    ty = (e.clientY / window.innerHeight - 0.5) * 0.2;
+  });
+
+  stage.classList.add("has-3d");
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var clock = new THREE.Clock();
+  var start = null;
+
+  function frame() {
+    var t = clock.getElapsedTime();
+    if (start === null && document.getElementById("story").classList.contains("visible")) start = t;
+
+    var sway = reduce ? 0 : Math.sin(t * 0.35) * 0.18;
+    mirror.rotation.y += ((sway + tx) - mirror.rotation.y) * 0.04;
+    mirror.rotation.x += ((-0.05 + ty) - mirror.rotation.x) * 0.04;
+    mirror.position.y = reduce ? 0 : Math.sin(t * 0.8) * 0.015;
+
+    glint.position.set(Math.sin(t * 0.5) * 2.5, 1.5 + Math.cos(t * 0.4) * 1.2, 3);
+
+    if (start !== null) {
+      var p = reduce ? 1 : Math.min(1, Math.max(0, (t - start - 0.8) / 4));
+      var eased = 1 - Math.pow(1 - p, 3);
+      for (var i = 0; i < threads.length; i++) {
+        var count = Math.floor(threads[i].userData.total * eased / 3) * 3;
+        threads[i].geometry.setDrawRange(0, count);
+      }
+      var b = reduce ? 1 : Math.min(1, Math.max(0, (t - start - 4.4) / 0.8));
+      bow.scale.setScalar(0.001 + b * (1 - 0.001));
+    }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 
 <button class="audio-hint" id="audioHint" type="button" hidden>
   ♫ Tap to start our song
